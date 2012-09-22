@@ -1,8 +1,8 @@
-c5d1e16ce7944c044773a74383be1325 *DESCRIPTION
+92b19272644c7a24c74b04b1cfbcb8cd *DESCRIPTION
 9b73b5d5b02c9253fdaae835498a318e *NAMESPACE
 59e353b1d086ae27718f13e006582050 *R/addResidualError.R
 c4e729f360a33c2948553175eb7374bb *R/allocateTreatments.R
-f78ec74429f2cd337cc121dc7c17723d *R/analyzeData.r
+fea8353086914f6d87af8e808d5427f7 *R/analyzeData.r
 ba9b8925fb3123880639e5e3dfd116be *R/analyzeRep.R
 83095125bbcc7af25ad8621fd61ea376 *R/applyPredCode.R
 b79afe77cb77383ee24b32e017be4cf4 *R/calculateDiffsFromBase.R
@@ -57,11 +57,11 @@ bde8553aab69aec5e829bd82d3618cb4 *R/parseRangeCode.R
 80464956ae06eb304d8c98148b0e840d *R/readData.R
 8cdb947cdd0e63d0086d26c1f09ead42 *R/removeDirectories.r
 e59548463c7e950eca2242f0acb99bc6 *R/summarizeTrialMeans.R
-bb4fa37e5d7a4db4c4ca2a2a11be64ec *R/utils.R
+3818aeafbed051664fd16032b29c77f6 *R/utils.R
 d59429603b16f4996e1b64781228d34b *R/validNames.R
 0031f049618c41e0f85fa0ff7d674ede *R/writeData.r
 35c60d0ee8897f3ae1359706ecdf07ba *R/writeLogFile.R
-71fae238e0d998799abdddf7a18f8e8d *R/zzz.R
+f713214cceba12b9464ba7d2042a462b *R/zzz.R
 cb492b7df9b5c170d7c87527940eff3b *TODO
 ec9ad5efba17bcc6f10847630a57f9f2 *TODO.grep
 4950e618ff6bbafa851427058d0ff24c *demo/00Index
@@ -179,7 +179,7 @@ da071499dbb1d948d5f14a56c74ac91b *inst/systemTest/runit.generateData.R
 603370c3dd1e553971d1e4b3ed984b4a *man/MSToolkit-package.Rd
 8f124a35b4acbdc79d355a16f0a8899b *man/addResidualError.Rd
 e56b50a2f769b701b5a73cd0d1021404 *man/allocateTreatments.Rd
-e2ab70844c22e4d2024785c60df6ab45 *man/analyzeData.Rd
+0e20b7d12c7fab67bfbcb022a5b95fb3 *man/analyzeData.Rd
 9000abf00037485f6386811c0e4ff2e4 *man/analyzeRep.Rd
 d55747ecd30fe86f1b19a7adb9a288c0 *man/applyPredCode.Rd
 9f2912853f0a0c4c9f11be501d981db4 *man/calculateDiffsFromBase.Rd

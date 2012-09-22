@@ -5,21 +5,21 @@
 # Author: Romain
 ###############################################################################
 # DESCRIPTION: set of utility functions, not exported
-# KEYWORDS: component:helper 
+# KEYWORDS: component:helper
 ###############################################################################
 
 .nonCumulativeFromCumulative <- function( proportion ){
-  
+
   ## format it correctly
-  proportion <- parseCharInput( proportion ) 
-  
+  proportion <- parseCharInput( proportion )
+
   ## check that the numbers are probabilities \in (0,1]
   if(max(proportion) >  1) ectdStop("Proportion greater than 1")
   if(min(proportion) <= 0) ectdStop("Proportion lower than 0")
-  
+
   ## append 1 if needed
   if(max(proportion) != 1) proportion <- c(proportion, 1)
-  
+
   ## generate the non-cumulative proportions
   proportion <- diff( c(0, proportion)  )
   if(any(proportion <= 0)) ectdStop("Proportion not increasing")
@@ -27,17 +27,17 @@
 }
 
 .deriveFromMasterSeed <- function(){
-	sample(1:999, 1) 
+	sample(1:999, 1)
 }
- 
+
 ### regular expression toys
-                                
+
 .quotes <- "(\\\"|\')"
-        
+
 
 .strinterp <- function(txt){
   myrx <- "\\$(\\{(.*?)\\}|[\\.]?[a-zA-Z][\\.0-9a-zA-Z]*)"
-  
+
   gx  <- gregexpr( myrx , txt, perl = TRUE)[[1]]
   va  <- substring( txt, gx + 1, gx + attr(gx, "match.length")-1) %-~% "[\\{\\}]"
   spl <- strsplit( txt, myrx , perl = TRUE )[[1]]
@@ -54,14 +54,14 @@
 }
 
 .allSameLength <- function( ... ){
-  all( diff( sapply(list(...), length)) == 0 ) 
+  all( diff( sapply(list(...), length)) == 0 )
 }
 
 .requiredArgs <- function(arg, msg){
   if( missing(arg) ) {
     sc <- sys.call()
     nameArg <- as.character(sys.call()[2])
-    if( missing(msg) ) msg <- "The argument `" %.% nameArg %.% "` is missing" 
+    if( missing(msg) ) msg <- "The argument `" %.% nameArg %.% "` is missing"
     ectdStop(msg)
   }
 }
@@ -71,7 +71,7 @@
 .expandSubjects <- function(subjects){
   if(length(subjects) == 1) {
     if(subjects < 1) ectdStop("subjects must be positive")
-    subjects <- 1:subjects 
+    subjects <- 1:subjects
   } else {
     subjects
   }
@@ -91,8 +91,8 @@
 		if( !all(  dim(probArray)  == sapply(values, length)  )) ectdStop("Dimension problem between `probArray` and `values`")
 		out <- cbind( do.call( expand.grid, values ), probs = as.vector( probArray) )
 		out <- subset( out, probs > 0)
-		
-	} else { 
+
+	} else {
 		## make tests on the probArray or build it
     	if ( missing(probArray) ) {
 			# try to build it
@@ -110,15 +110,15 @@
 				if(sum(probArray[,ncol(probArray)]) != 1) ectdStop("the probArray does not sum up to one")
 				if(ncol(probArray) - 1 != length(values)) ectdStop("The `probArray` has wrong dimensions")
 			}
-			
+
 			if (is.array(probArray)) {
 				if(sum(probArray) != 1) ectdStop("the probArray does not sum up to one")
 				if(length(dim(probArray)) != length(values)) ectdStop("The `probArray` has wrong dimensions")
 			}
-			
+
 		}
-    
-		## make the grid                               
+
+		## make the grid
 		out <- cbind( do.call( expand.grid, values ), probs = as.vector(probArray) )
 	}
 	## make sure they are all factors
@@ -133,11 +133,11 @@
 }
 
 .dummy <- function(...){
-  cat( "\n\nFunction `"%.% as.character(match.call()[1]) %.% "` not yet implemented\n\n" ) 
+  cat( "\n\nFunction `"%.% as.character(match.call()[1]) %.% "` not yet implemented\n\n" )
 }
 
 .log <- function( ... , file = getEctdLogFile(), verbose = getEctdVerbose()){
-  if( verbose ){ 
+  if( verbose ){
     msg <- paste( ..., "\n", sep = "" )
     msg <- .strinterp( msg )
     msg <- sprintf( "[%s] %s", format( Sys.time(), getEctdDateFormat() ) , msg )
@@ -147,14 +147,14 @@
 }
 
 ".checkFun" <- function(
-	fun, 
+	fun,
 	expectedArgs
 ){
 	fun <- try( eval( match.fun(fun), parent.frame() ), silent = TRUE )
-	if (class(fun) == "try-error") ectdStop("not a valid function")   
-	if( !missing(expectedArgs) ){  
-		expectedArgs <- parseCharInput( expectedArgs, convertToNumeric = FALSE )           
-		if( !all(expectedArgs %in% names(formals(fun))) ) 
+	if (class(fun) == "try-error") ectdStop("not a valid function")
+	if( !missing(expectedArgs) ){
+		expectedArgs <- parseCharInput( expectedArgs, convertToNumeric = FALSE )
+		if( !all(expectedArgs %in% names(formals(fun))) )
 			ectdStop("Problem with the arguments of the function")
 	}
 	fun
@@ -179,7 +179,7 @@
 }
 
 .checkGridAvailable <- function(){
-  suppressWarnings(require(foreach, quietly = TRUE) &&  (require(doSNOW, quietly = TRUE) || require(doParallel, quietly = TRUE))) 
+  suppressWarnings(require(foreach, quietly = TRUE) &&  require(doParallel, quietly = TRUE))
 }
 
 .splitGridVector <- function(vec, nReps = 100) {
@@ -191,12 +191,13 @@
 }
 
 
-.ectdSasCall <- function(params, 
-  sasLoc = if (.Platform$OS.type == "windows") getEctdExternalPath("SASPATH_WIN") else getEctdExternalPath("SASPATH_UNIX"), 
-  macroLoc = file.path(.path.package("MSToolkit"), "sasAnalysis.sas"), 
+.ectdSasCall <- function(params,
+  sasLoc = if (.Platform$OS.type == "windows") getEctdExternalPath("SASPATH_WIN") else getEctdExternalPath("SASPATH_UNIX"),
+  ## should be system.file
+  macroLoc = file.path(path.package("MSToolkit"), "sasAnalysis.sas"),
   logFile = file.path(workingPath, "sasLogfile.log"),
   printFile = file.path(workingPath, "sasOutput.lst"),
-  workingPath = getwd()) 
+  workingPath = getwd())
 {
 	sasDir <- gsub( "\\\\[^\\]*$", "", sasLoc)
 	if(!file.exists(sasDir)) ectdStop("SAS is not available on the system: \n\t$sasLoc")
@@ -208,7 +209,7 @@
 
 
 .roundIt <- function( data, digits ){
-  if(!missing(digits)){   
+  if(!missing(digits)){
     digits <- parseCharInput( digits, convertToNumeric = TRUE )
     nCov <- ncol( data )
     if(any(digits < 0 )) ectdStop("`digits` should be a positive vector")
@@ -227,18 +228,18 @@
 }
 
 
-.cleanup <- function( 
+.cleanup <- function(
   cleanUp = TRUE,       # do I do any cleanup
   grid = FALSE,         # was the grid used
-  workingPath = getwd(), # where to work 
+  workingPath = getwd(), # where to work
   method = getEctdDataMethod()  # Method of data storage to "clean"
   ){
-  
+
 	if( cleanUp ){
 		if (method %in% c("CSV", "RData")) {
 			.log("removing micro and macro directories")
 			removeDirectories(c("MicroEvaluation", "MacroEvaluation"), workingPath = workingPath)
-			if(grid){ 
+			if(grid){
 				allconns <- showConnections()
 				sockconns <- rownames(allconns)[which(allconns[, "class"] == "sockconn")]
 				if (length(sockconns) > 0) for (i in sockconns) try(close(getConnection(i)))
@@ -249,7 +250,7 @@
 			ectdStop("Have not yet implemented the cleanup of 'Internal' data stored")
 		}
 	}
-  
+
 }
 
 .applyDataSubset <- function(df, subset) {
@@ -284,7 +285,7 @@
 }
 
 # Image Comparison Function
-.compareImages <- function(result, target, 
+.compareImages <- function(result, target,
 		exeLoc = system.file(package = "MSToolkit", "ImageCompare", "diff.exe")) {
 	if (!file.exists(result) | !file.exists(target)) return(FALSE)
 	buildCall <- paste(exeLoc, shortPathName(result), shortPathName(target))
