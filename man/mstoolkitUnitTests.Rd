@@ -29,7 +29,7 @@ mstoolkitUnitTests(htmlreport = FALSE, showdetails = TRUE)
   http://wiki.r-project.org/rwiki/doku.php?id=developers:runit
   
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ \code{\link[RUnit]{runTestSuite}} }
 \examples{
   \dontrun{

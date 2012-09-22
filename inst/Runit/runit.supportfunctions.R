@@ -1,5 +1,5 @@
 
-if( !exists("unitTestPath")) unitTestPath <- "."
+if( !exists("unitTestPath")) unitTestPath <- system.file(package = "MSToolkit", "Runit")
 testdata.supportfunctions.dir <- file.path( unitTestPath, "testdata.supportfunctions" )
 
 .data.frame.compare <- function(
@@ -80,27 +80,7 @@ testdata.supportfunctions.dir <- file.path( unitTestPath, "testdata.supportfunct
   checkEquals(initialChar("34Zy", adm="werZ"), "z")
   checkException(initialChar(""))
  }
-#  Author: Francisco
-#  Date: Jun 27 2007
- 
- test.createEmptyMicro <- function()
- {
-  checkException(createEmptyMicro()) 
-  checkException(createEmptyMicro(doses=NULL))
-  checkException(createEmptyMicro(doses = c()))
-  checkException(createEmptyMicro(doses = c(1, "1")), msg = "Duplicate doses are not allowed")
-  #<T> Duplicate doses are not allowed
-  checkException(createEmptyMicro(doses = c(1, 1, 2)), msg = "Duplicate doses are not allowed in the doses vector")
-  checkException(createEmptyMicro(doses = c(1, 2, 3), doseCol = "DOSE", microColumnNames = c("DOSES", "MEAN", "SE", "UPPER", "LOWER"))
-    , msg = "Dose column is not found in the column names")
-  testd <- read.csv(file.path(testdata.supportfunctions.dir,"micro0004.csv"))
-  checkTrue(.data.frame.compare(testd, createEmptyMicro(doses = c(10, 20, 30, 40))), msg = "These two frames should be equal")
-  testd <- read.csv(file.path(testdata.supportfunctions.dir,"micro0005.csv"))
-  checkTrue(.data.frame.compare(testd, createEmptyMicro(doses = "10, 20, 30, 40", doseCol = "D", microColumnNames = c("D", "MEAN", 
-  "LOWER", "UPPER"))), msg  = "These two frames should be equal")
- 
- }                                                        
- 
+
  test.ectdStop <- function()
  {
   checkException(ectdStop("test"))
@@ -145,19 +125,18 @@ test.parseCovMatrix <- function(){
 
 test.parseRangeCode <- function()
 {
-  checkEquals(deparse(parseRangeCode("x<4")), "expression((x < 4))")
-  expr <- deparse(parseRangeCode(c("2 <= 10 >= x", "x >= x", "z < 4 < 1")))
-
-  # Concatenate any output seperated by deparse and remove all whitespace
-  expr <- gsub( "[[:space:]]", "", paste(expr, collapse="") )
-  print(expr)
-  checkEquals(expr, "expression((2<=10)&(10>=x)&(x>=x)&(z<4)&(4<1))")
-  checkException(parseRangeCode(c("x < 4", "(2 > z")))
-  checkException(parseRangeCode(c("1 > z >= 4", "y")))
-
-  expr <- deparse(parseRangeCode(c("1 >=               x         <             z", "1         <                2")))
-  expr <- gsub(  "[[:space:]]", "", paste(expr, collapse="") )
-  checkEquals(expr, "expression((1>=x)&(x<z)&(1<2))")
+	checkEquals(as.character(parseRangeCode("x<4")), "(x < 4)")
+	expr <- as.character(parseRangeCode(c("2 <= 10 >= x", "x >= x", "z < 4 < 1")))
+	
+	# Concatenate any output seperated by deparse and remove all whitespace
+	expr <- gsub( "[[:space:]]", "", expr )
+	checkEquals(expr, "(2<=10)&(10>=x)&(x>=x)&(z<4)&(4<1)")
+	checkException(parseRangeCode(c("x < 4", "(2 > z")))
+	checkException(parseRangeCode(c("1 > z >= 4", "y")))
+	
+	expr <- as.character(parseRangeCode(c("1 >=               x         <             z", "1         <                2")))
+	expr <- gsub(  "[[:space:]]", "", paste(expr, collapse="") )
+	checkEquals(expr, "(1>=x)&(x<z)&(1<2)")
 }
 
 test.parseHashString <- function()
@@ -178,27 +157,55 @@ test.validNames <- function()
   checkException(validNames("barof$oap"), "$ is not allowed in a variable name")
 }
 
-# Author: Francisco
-# Date: July 13
+test.checkColNames <- function() {
+	checkException(checkColNames(letters, ".2"), msg = "Calling through to validNames")
+	checkException(checkColNames(letters, c("foo", "bar", "5ar")), "Calling through to validNames")
+	checkException(checkColNames(letters, "barof$oap"), "Calling through to validNames")
+	checkException(checkColNames(letters, c("hello", "there")))
+	checkTrue(checkColNames(letters, letters))
+}
 
+test.parseRCode <- function() {
+	checkTrue(is.expression(parseRCode("Hello")))
+	checkTrue(is.expression(parseRCode(1:5)))
+	checkTrue(is.expression(parseRCode(mtcars)))
+	suppressWarnings(rm(helloTestObject))
+	checkException(parseRCode(helloTestObject))
+}
+
+# Author: Rich P
+# Date: December 14
 test.checkMicroFormat <- function()
 {
-  # load some test data
-  x1 <- read.csv(paste(testdata.supportfunctions.dir, "micro0001.csv", sep="/"))
-  # x2 <- read.csv(paste(testdata.supportfunctions.dir, "testdata.createEmptyMicro1.csv", sep="/"))
-  
-  checkTrue(identical(createEmptyMicro(doses = c(11, 20, 30, 40)), checkMicroFormat(dat = x1, doses = c(11, 20, 30, 40))),
-  msg = "doses is not a subset of the dose vector in x1")
-  checkTrue(.data.frame.compare(x1, checkMicroFormat(dat = x1, doses = c(0, 10, 25, 50, 100))), 
-  msg = "All of the doses are contained in x1, and so are the default column names")
-  checkTrue(.data.frame.compare(createEmptyMicro(doses = c(0, 10, 25, 50, 100), microColumnNames = c("DOSE", "FOO")), 
-  checkMicroFormat(dat = x1, doses = c(0, 10, 25, 50, 100) , doseCol = "DOSE", microColumnNames = c("DOSE", "FOO"))), 
-  msg = "FOO is not a column name in x1")
-  x1 <- read.csv(paste(testdata.supportfunctions.dir, "micro0002.csv", sep="/"))
-  checkTrue(.data.frame.compare(x1,checkMicroFormat(dat = x1, doses = c(25, 50, 100) , doseCol = "DOSE",
-   microColumnNames = c("INTERIM","INTERIMC","DOSE","MEAN","SE","LOWER","UPPER","N","DROPPED","STOPPED","K"))), msg = "")
-  x1 <- read.csv(paste(testdata.supportfunctions.dir, "micro0001.csv", sep="/"))                                             
-  x2 <- read.csv(paste(testdata.supportfunctions.dir, "micro0003.csv", sep="/"))
-  checkMicroFormat(x1, doses = c(5, 15, 25,50,100))
-  checkTrue(.data.frame.compare(x2, checkMicroFormat(x1, doses = c(5, 15, 25,50,100))))
-}                      
+	checkException( checkMicroFormat(1:5), msg = "Not a data frame")
+	checkException( checkMicroFormat(data.frame()), msg = "Not a data frame")
+	checkException( checkMicroFormat(data.frame(DOSE = 1:5), "Hello", TRUE), msg = "Missing dose variable")
+
+	x <- data.frame(DOSE1 = c(0, 15, 30), dose2 = c(0, 15, 30), dOsE3 = c(0, 15, 30))
+	d1 <- checkMicroFormat(x, "dose1", TRUE)$dose1
+	d2 <- checkMicroFormat(x, "DOSE2", TRUE)$DOSE2
+	d3 <- checkMicroFormat(x, "DoSe3", TRUE)$DoSe3
+	checkTrue( all(d1 == c(0, 15, 30)), msg = "Dose matching on case: example 1")
+	checkTrue( all(d2 == c(0, 15, 30)), msg = "Dose matching on case: example 2")
+	checkTrue( all(d3 == c(0, 15, 30)), msg = "Dose matching on case: example 3")
+
+}
+
+test.dataAggregate <- function() {
+
+	N <- 200
+	myDf <- data.frame(S1 = sample(1:3, N, T), S2 = sample(1:2, N, T), S3 = rep(1, N),
+			B1 = sample(1:N), B2 = sample(1:N, N, T), RESP = rnorm(N))
+	
+	out1 <- MSToolkit:::.dataAggregate(list(MEAN = myDf$RESP), myDf[c("S1", "S2")], mean, bound = 100)
+	orig1 <- aggregate(list(MEAN = myDf$RESP), myDf[c("S1", "S2")], mean)
+	checkTrue(identical(out1, orig1))
+	
+	out2 <- MSToolkit:::.dataAggregate(list(MEAN = myDf$RESP), myDf[c("S1", "B1", "S2", "B2")], mean, bound = 100)
+	orig2 <- aggregate(list(MEAN = myDf$RESP), myDf[c("S1", "B1", "S2", "B2")], mean)
+	checkTrue(identical(out2, orig2))
+	
+}
+	
+
+

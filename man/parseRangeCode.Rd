@@ -1,6 +1,5 @@
 \name{parseRangeCode}
 \alias{parseRangeCode}
-\alias{parseRCode}
 
 \title{Parse a numerical range expression} 
 \description{parseRangeCode: Converts inequalities of up to two comparators stored in a vector of strings into an executable R expression.  For
@@ -10,7 +9,6 @@
 
 \usage{
 parseRangeCode(code)
-parseRCode(code)
 }
 
 \arguments{
@@ -27,7 +25,7 @@ single expression with "&".  Hence c("1 < Y", "2 < Z <= 5") would become \code{(
 \value{
 An expression constructed as detailed above.
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} } 
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \section{Warning}{  The character "|" is not allowed in any of the expressions contained in "code" for the \code{parseRangeCode} function.}
 \seealso{ \code{\link{subset}}, \code{\link{parse}}  }
 \examples{

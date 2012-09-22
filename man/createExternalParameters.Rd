@@ -2,22 +2,23 @@
 \alias{createExternalParameters}
 \title{Sample parameters from an external file}
 \description{
-  Create parameters for a simulated population by sampling them from an external file. 
+  Create parameters for a simulated population by sampling them from an external file
 }
 \usage{
-  createExternalParameters(subjects, file, names, betNames, betNums, errStruc = "None", 
-  suffix = ".Between", subset = NULL, refCol, refColName, idCol = "SUBJ", 
-  seed = .deriveFromMasterSeed(), flagName = "PAROMIT", refColSuffix = "refCol", 
+  createExternalParameters(subjects, file, names, range, betNames, betNums, 
+  errStruc = c("None", "Proportional", "Additive", "Log-Normal"), 
+  subset = NULL, refCol, refColName, idCol = getEctdColName("Subject"), 
+  seed = .deriveFromMasterSeed(), flagName = getEctdColName("ParOmit"), refColSuffix = "refCol", 
   dataId = idCol, workingPath = getwd())
 }
 \arguments{
   \item{subjects}{ (Required) Number of subjects for which to create parameters }
   \item{file}{ (Required) External file from which to extract parameters }
   \item{names}{ (Required) Names of parameters to import (refers to variables in the input data) }
+  \item{range}{ (Optional) Range of acceptable values.  Missing by default, resulting in no "range" of values is applied to the data }
   \item{betNames}{ (Required) Between subject effects variables in the data }
   \item{betNums}{ (Required) Integer vector mapping between subject effects onto fixed effects }
-  \item{errStruc}{ (Optional) (None) Function to map between subject effects: Additive, Proportional or None }
-  \item{suffix}{ (Optional) Suffix to use for retained between subject effects variables.  By default, ".Between" is used as the default }
+  \item{errStruc}{ (Optional) (None) Function to map between subject effects: Additive, Proportional, Log-Normal or None }
   \item{subset}{ (Optional) Subset to apply to the data.  By default, no subset is applied }
   \item{refCol}{ (Optional) Vector of data to be matched to the reference column for sampling (no reference data by default) }
   \item{refColName}{ (Optional) Column name in data for referenced sampling (no reference column by default) }
@@ -31,20 +32,24 @@
 \details{
   The data is first imported from the specified file, and any subset applied to it.  The function next checks that all required variables specifed appear in the imported data.
   Fixed effects (specified using names) are selected from the file along with between subject effects (if they are also identified).
-  If both fixed and between subject parameters have been selected, the function will use the \code{errStruc} input as follows:
-  * None = Keep between subject effect seperate (and use the \code{suffix} suppied to name the variables)
-  * Additive = Add each specified between subject effects to the corresponding fixed effect (based on the mapping specified in betNums)
-  * Proportional = Add each between subject effect to the corresponding fixed effect (based on the mapping specified in betNums) then exponentiate the result  
-  
-  If the \code{refCol} input is specified, this variable should also be retained in the result.
-  The "parameter omit" flag will contain repeated "0" elements in the return result.
 
-  \code{createExternalParameters} assumes that sampling is performed for parameters at the subject level. That is, fixed and random effects can be sampled and combined using \code{errStruc} or retained as separate variables in order to create subject-specific parameter values. Future versions of MSToolkit will allow sampling at the replicate level e.g. sampling from MCMC posterior distribution output from WinBUGS.
+  If fixed and between subject effects have been generated, the "errStruc" input will specify how the between subject effects are to be applied:
+  * None = Keep between subject effect seperate (and use the "suffix" supplied to name the variables)
+  * Additive = Add each between subject effect to the corresponding fixed effect
+  * Proportional = Multiply the fixed effect by the exponentiated between subject effect
+  * Log-Normal = Add "1 + each between subject effect" to the corresponding fixed effect
+  
+  If the relCol input is specified, this variable should also be retained in the result.
+  The "parameter omit" flag will contain repeated "0" elements in the return result.
+}
+\note{
+If earlier versions of MSToolkit, the "Proportional" error structure was implemented as exp(fixed + between subject)
 }
 \value{
   A data frame containing a subject variable, a "parameter omit flag" and a set of extracted parameters
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }\seealso{ 
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
+\seealso{ 
   \code{\link{createParameters}} and \code{\link{createNormalParameters}}
 }
 \examples{

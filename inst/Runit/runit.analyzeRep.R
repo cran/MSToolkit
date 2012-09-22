@@ -1,5 +1,7 @@
 
-if( !exists("unitTestPath")) unitTestPath <- "."
+setEctdDataMethod("CSV")
+
+if( !exists("unitTestPath")) unitTestPath <- system.file(package = "MSToolkit", "Runit")
 analyseRep.datapath <- file.path( unitTestPath , "data", "analyseRep" )
 cat("analyseRep.datapath:", analyseRep.datapath, "\n" )
 
@@ -49,12 +51,7 @@ test.analyseRep <- function(){
      workingPath = analyseRep.datapath, 
      parOmitFlag = "@954fgPAROMIT" ) , 
      msg = "wrong sort of paromit flag, wrong name" )
-     
-  checkException( analyzeRep( replicate = 1, analysisCode = dummyAnalysisCode,
-     workingPath = analyseRep.datapath, 
-     parOmitFlag = "myPAROMIT" ), 
-     msg = "wrong sort of paromit flag, not in the dataset" )
-     
+          
   # respomit flag
   checkException( analyzeRep( replicate = 1, analysisCode = dummyAnalysisCode,
      workingPath = analyseRep.datapath, 
@@ -65,12 +62,7 @@ test.analyseRep <- function(){
      workingPath = analyseRep.datapath, 
      respOmitFlag = "@954fgRESPOMIT" ), 
      msg = "wrong sort of respomit flag, wrong name" )
-     
-  checkException( analyzeRep( replicate = 1, analysisCode = dummyAnalysisCode,
-     workingPath = analyseRep.datapath, 
-     respOmitFlag = "myRESPOMIT" ), 
-     msg = "wrong sort of respomit flag, not in the dataset" )
-     
+          
   # missomit flag
   checkException( analyzeRep( replicate = 1, analysisCode = dummyAnalysisCode,
      workingPath = analyseRep.datapath, 
@@ -79,14 +71,9 @@ test.analyseRep <- function(){
   
   checkException( analyzeRep( replicate = 1, analysisCode = dummyAnalysisCode,
      workingPath = analyseRep.datapath, 
-     missFlag = "@954fgMISSING" ), 
+     missingFlag = "@954fgMISSING" ), 
      msg = "wrong sort of missomit flag, wrong name" )
-     
-  checkException( analyzeRep( replicate = 1, analysisCode = dummyAnalysisCode,
-     workingPath = analyseRep.datapath, 
-     missingFlag = "myMISSING" ), 
-     msg = "wrong sort of missomit flag, not in the dataset" )
-     
+          
   # interim
   checkException( analyzeRep( replicate = 1, analysisCode = dummyAnalysisCode,
      workingPath = analyseRep.datapath, 
@@ -97,7 +84,6 @@ test.analyseRep <- function(){
      workingPath = analyseRep.datapath, 
      interimCol = "@954fginterim" ), 
      msg = "wrong sort of imterim flag, wrong name" )
-       
      
   interimCode <- function( data ){
     outList <- list()

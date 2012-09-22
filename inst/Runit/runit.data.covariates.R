@@ -1,4 +1,4 @@
-if( !exists("unitTestPath")) unitTestPath <- "."
+if( !exists("unitTestPath")) unitTestPath <- system.file(package = "MSToolkit", "Runit")
 covariates.datapath <- file.path( unitTestPath , "data", "createCovariates" )
 cat("covariates.datapath: ", covariates.datapath , "\n")
 
@@ -321,3 +321,103 @@ test.data.covariates.sf3 <- function() {
   checkEquals( out[,2:4] , round(out[,2:4], 3), 
     msg = "check the use of a digits not vector")
 }
+
+# tests added to comply with the bug of createDiscreteCovariates
+test.data.covariates.disc.debug <- function() {
+	
+	subjects = 10
+	names = "X, Y, Z"
+	
+	values1 = "1,2#7,8,9#a,b"
+	probs1 = ".1,.9#.5,.4,.1#.5,.5"
+	
+	values2 = c("1,2", "7,8,9", "a,b")
+	probs2 = c(".1,.9", ".5,.4,.1", ".5,.5")
+	
+	values3 = list(c(1, 2), c(7, 8, 9), c("a", "b"))
+	probs3 = list(c(.1, .9), c(.5, .4, .1), c(.5, .5))
+	
+	pArray1 <- data.frame(expand.grid( X = 1:2, Y = 7:9, Z = c("a", "b")), PROB = c(rep(0.08, 10), 0.1, 0.1))
+	pArray2 <- array(c(rep(0.08, 10), 0.1, 0.1), dim = c(2, 3, 2))
+	pArray3 <- array(c(rep(0.08, 10), 0.1, 0.1), dim = c(2, 3, 2), dimnames = list(c(1, 2), c(7, 8, 9), c("a", "b")))
+	
+	dat1 <- createDiscreteCovariates(subjects = subjects, names = names, values = values1, probs = probs1)
+	dat2 <- createDiscreteCovariates(subjects = subjects, names = names, values = values2, probs = probs2)
+	dat3 <- createDiscreteCovariates(subjects = subjects, names = names, values = values3, probs = probs3)
+	
+	dat4 <- createDiscreteCovariates(10, probArray = pArray1)
+	#dat5 <- createDiscreteCovariates(10, names = "X, Y, Z", values = list(c(1, 2), c(7, 8, 9), c("a", "b")), probArray = pArray2)
+	dat6 <- createDiscreteCovariates(10, names = "X, Y, Z", probArray = pArray3)
+	
+	checkTrue(is.data.frame(dat4))
+	checkTrue(is.data.frame(dat6))
+	
+}
+
+
+test.data.covariates.disc.handleProbArray <- function() {
+	
+	# 2 vars
+	values0 <- list(c(7, 8, 9), c("a", "b"))
+	probs0 <- list(c(.5, .4, .1), c(.5, .5))
+	names(values0) <- c("Y", "Z")
+	names(probs0) <- c("Y", "Z")
+	p0 <- c(0.25, 0.2, 0.05, 0.25, 0.2, 0.05)
+	
+	pArray1 <- data.frame(expand.grid(a = 7:9, b = c("a", "b")), PROB = p0)
+	pArray2 <- array(p0, dim = c(3, 2))
+	pArray3 <- array(p0, dim = c(3, 2), dimnames = list(c(7, 8, 9), c("a", "b")))
+	
+	grid1 <- MSToolkit:::.handleProbArray(values = values0, probs = probs0)
+	grid2 <- MSToolkit:::.handleProbArray(probArray = pArray1, values = values0)
+	grid3 <- MSToolkit:::.handleProbArray(probArray = pArray2, values = values0)
+	grid4 <- MSToolkit:::.handleProbArray(probArray = pArray3, values = values0)
+	
+	#checkEquals(grid1, grid2)
+	checkEquals(grid1, grid3)
+	checkEquals(grid1, grid4)
+	
+	# 3 vars
+	values0 <- list(c(1, 2), c(7, 8, 9), c("a", "b"))
+	probs0 <- list(c(.1, .9), c(.5, .4, .1), c(.5, .5))
+	names(values0) <- c("X", "Y", "Z")
+	names(probs0) <- c("X", "Y", "Z")
+	p0 <- c(0.025, 0.225, 0.020, 0.180, 0.005, 0.045, 0.025, 0.225, 0.020, 0.180, 0.005, 0.045)
+	
+	pArray1 <- data.frame(expand.grid( X = 1:2, Y = 7:9, Z = c("a", "b")), PROB = p0)
+	pArray2 <- array(p0, dim = c(2, 3, 2))
+	pArray3 <- array(p0, dim = c(2, 3, 2), dimnames = list(c(1, 2), c(7, 8, 9), c("a", "b")))
+	
+	grid1 <- MSToolkit:::.handleProbArray(values = values0, probs = probs0)
+	grid2 <- MSToolkit:::.handleProbArray(probArray = pArray1, values = values0)
+	grid3 <- MSToolkit:::.handleProbArray(probArray = pArray2, values = values0)
+	grid4 <- MSToolkit:::.handleProbArray(probArray = pArray3, values = values0)
+	
+	checkEquals(grid1, grid3)
+	checkEquals(grid1, grid4)
+}
+
+
+test.data.covariates.timevarying <- function() {
+	subjects <- 1:10
+	names <- "X, Y, Z"
+	mean <- list(X = 1:4, Y = rep(3, 4), Z = "2.5, 3, 3.2, 3.6")
+	covariance = list(1, 2:5, cbind(c(1,.5,.3,0), c(.5,1,0,0), c(.3,0,1,0), c(0,0,0,1)))
+	range = list("10>=X>0", NULL, c("Z>0", "Z<=10"))
+	digits = 2
+	maxDraws = 100
+	seed = 99
+	idCol = "SUBJ"
+	timeCol = "TIME"
+	treatPeriod = c(0.25, 0.5, 1, 12)
+	
+	dat <- createTimeVaryingCovariates(10, "X, Y, Z", 
+			mean <- list(X = 1:4, Y = rep(3, 4), Z = "2.5, 3, 3.2, 3.6"),
+			covariance = list(1, 2:5, cbind(c(1,.5,.3,0), c(.5,1,0,0), c(.3,0,1,0), c(0,0,0,1))),
+			range = list("10>=X>0", NULL, c("Z>0", "Z<=10")),
+			idCol = "SUBJ", timeCol = "TIME", treatPeriod = c(0.25, 0.5, 1, 12))
+	
+	checkEquals(unique(dat$TIME), c(0.25, 0.5, 1, 12))
+}
+
+

@@ -48,9 +48,12 @@ test.data.treatments.crossover <- function() {
   ## not enought times
   checkException( createTreatments( sequence = seqMat, times = c(1,2)) )
   
-  tr <- createTreatments( sequence = seqMat, times = c(-1,1,2,3)) 
+  ## wrong matrix for run in
+  checkException( createTreatments( sequence = seqMat, times = c(-2,-1,1,2)) )
+  
+  tr <- createTreatments( sequence = seqMat, times = c(0,1,2,3)) 
   ## run in test
-  checkTrue( all(tr$DOSE[tr$TIME < 0] == 0 ) ) 
+  checkTrue( all(tr$DOSE[tr$TIME <= 0] == 0 ) ) 
   for(i in 1:3) checkTrue( all(tr$DOSE[tr$TRT==i] == seqMat[,i])  )
   
   seqMat <- rbind(
@@ -62,11 +65,11 @@ test.data.treatments.crossover <- function() {
   x <- createTreatments(sequence=cbind(c(0, 15, 30), c(15, 30, 0) ,c(30, 15, 0)))
   checkTrue(identical(x, data.frame(TRT=rep(1:3, each=3), TIME=rep(1:3, 3), DOSE=c(0, 15, 30, 15, 30, 0, 30, 15, 0))))
 
-  x <- createTreatments(type="c", times=c(-1,1:3), sequence=cbind(c(0, 15, 30), c(15, 30, 0) ,c(30, 15, 0)))
-  checkTrue(identical(x, data.frame(TRT=rep(1:3, each=4), TIME=rep(c(-1,1:3), 3), DOSE=c(0, 0, 15, 30, 0, 15, 30, 0, 0, 30, 15, 0))))
+  x <- createTreatments(type="c", times=0:3, sequence=cbind(c(0, 15, 30), c(15, 30, 0) ,c(30, 15, 0)))
+  checkTrue(identical(x, data.frame(TRT=rep(1:3, each=4), TIME=rep(0:3, 3), DOSE=c(0, 0, 15, 30, 0, 15, 30, 0, 0, 30, 15, 0))))
 
-  x <- createTreatments(doses=1:2, times=-1:1, trtCol="X", timeCol="Y", doseCol="Z")
-  checkTrue(identical(x, data.frame(X=rep(1:2, each=3), Y=rep(-1:1, 2), Z=c(0,1,1,0,2,2))))
-
+  x <- createTreatments(doses=1:2, times=0:1, trtCol="X", timeCol="Y", doseCol="Z")
+  checkTrue(identical(x, data.frame(X=rep(1:2, each=2), Y=rep(0:1, 2), Z=c(1, 1, 2, 2))))
+  
 }
 

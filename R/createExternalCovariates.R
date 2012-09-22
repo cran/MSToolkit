@@ -6,7 +6,7 @@ createExternalCovariates <- function(
   subset = NULL,  #@ Subset to apply to the data
   refCol = NULL,  #@ Parameter reference variable in dataset
   dataId = idCol, #@ Subject variable in data
-  idCol = "SUBJ",   #@ Subject variable name
+  idCol = getEctdColName("Subject"),   #@ Subject variable name
   percent = 20,   #@ Percentage of values to use for checking rows in dataset vs samples to extract
   seed = .deriveFromMasterSeed(), # Random seed
   includeIDCol = TRUE, 
@@ -25,27 +25,22 @@ createExternalCovariates <- function(
   
   set.seed( seed )
   subjects <- .expandSubjects( subjects )
+  nSubjects <- get("nSubjects")
   names    <- parseCharInput(names, convertToNumeric = FALSE, checkdup = TRUE)
   subset   <- parseRangeCode( subset )
   validNames( idCol, dataId, names)
   if(!is.null(refCol)) validNames( refCol )
   percent <- parseCharInput( percent, expected = 1, convertToNumeric = TRUE )
   if( percent < 0 || percent > 100) 
-    ectdStop("Argument `percent` should be between 0 and 100")
+    ectdStop("`percent` should be between 0 and 100")
   
   iData <- .readAndCheckInputFile( file.path(workingPath, file), c(dataId, names) )
   if(!is.null(refCol) && refCol %!in% names(iData) )
     ectdStop("There is no column `$refCol` in the dataset `$file`")
   if(!is.null(refCol) && !sameRow )
     ectdStop("sameRow = FALSE is not compatible with the use of refCol")
-  if( !is.null(subset)) {
-    subs <- try( eval(subset, iData ) )  
-    subs %!of% "try-error" || ectdStop("Error when executing subset")
-    is.logical(subs)       || ectdStop("The subset code does not produce logicals")   
-    any(subs)              || ectdStop("No data left after applying the subset code")
-    iData <- iData[ subs, ,drop = FALSE]
-  }  
-  
+  if( !is.null(subset)) iData <- .applyDataSubset(iData, subset)
+
   # taking the first value for each ID
   iData <- iData[ !duplicated(iData[[dataId]]), ,drop = FALSE]
    

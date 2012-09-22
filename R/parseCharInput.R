@@ -25,16 +25,18 @@ parseCharInput <- function(
   
   out <- if(is.numeric(input) ) input else {
     ## handles the commas (TESTFIX)
-    if( input %~% ",$")
+    if( any( regexpr(",$", input)  > 0 ) )
       ectdStop("Traling comma not accepted")
-    if( input %~% "^," )
+
+    if( any( regexpr("^,", input)  > 0 ) )
       ectdStop("Leading comma not accepted")
-    if( input %~% ",{2,}")
+    if( any( regexpr(",{2,}", input)  > 0 ) )
       ectdStop("The separator should only be **one** comma")
       
     ## a numeric value is made numbers, dots, plus, minus and possibly e for the scientific
     ## notation (is there a need to be more clever with the scientific notation) 
-    if( convertToNumeric && input %~% "[^0-9eE\\.,[:space:]\\+\\-]" ) 
+    if( convertToNumeric && any( regexpr("[^0-9eE\\.,[:space:]\\+\\-]", input)  > 0 )  ) 
+		
       ectdStop("Impossible to convert to numbers")
     out <- unlist( strsplit(input, "[[:space:]]*,[[:space:]]*" ) )
     if(convertToNumeric) out <- as.numeric(out)  

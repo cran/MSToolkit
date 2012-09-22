@@ -6,17 +6,17 @@
 }
 \usage{
 createExternalCovariates(subjects, names, file, sameRow = TRUE, 
-  subset = NULL, refCol = NULL, dataId = idCol, idCol = "SUBJ", 
+  subset = NULL, refCol = NULL, dataId = idCol, idCol = getEctdColName("Subject"), 
   percent = 20, seed = .deriveFromMasterSeed(), includeIDCol = TRUE, 
   refColSuffix = "refCol", workingPath = getwd())
 }
 \arguments{
   \item{subjects}{ (Required) Number of subjects for which to sample sets of external covariate values }
   \item{names}{ (Required) Names of the covariates to use from the \code{file} }
-  \item{file}{ (Required) Input file name.  This should be either a valid csv file or a NONMEM data/table file containing all the variables given by \code{names}, \code{idCol} }
-  \item{sameRow}{ (Optional) A logical value).  Should all the covariates be sampled from the same rows or should the sampling be done independently for each covariate.  Using \code{sameRow = TRUE} would maintain the multivariate structure of the imported dataset and is faster.  TRUE by default }
+  \item{file}{ (Required) Input file name.  This should be either a valid csv file or a NONMEM data file containing all the variables given by \code{names}, \code{idCol} }
+  \item{sameRow}{ (Optional) A logical value).  Should all the covariates be sampled from the same rows or should the sampling be done independantly for each covariate.  Using \code{sameRow = TRUE} would maintain the multivariate structure of the imported dataset and is faster.  TRUE by default }
   \item{subset}{ (Optional) Any subset to be performed on the imported dataset before doing any sampling. The subset is parsed by the \code{\link{parseRangeCode}} function.  No subsetting is performed by default }
-  \item{refCol}{ (Optional) The reference column in the data file (variable in the data file to be used as a reference for the source of the sampled data).  If given, the output dataset will also  contain an additional column indicating the origin of each row from the original dataset. This option is not compatible with \code{sameRow = FALSE}.  By default, reference variables are not used }
+  \item{refCol}{ (Optional) The reference column in the data file.  If given, the output dataset will also  contain an additional column indicating the origin of each row from the original dataset. This option is not compatible with \code{sameRow = FALSE}.  By default, reference variables are not used }
   \item{dataId}{ (Optional) The subject variable in the input dataset, equal to \code{idCol} by default.  By default, it will be the same as "idCol" }
   \item{idCol}{ (Optional) The subject variable in the output dataset.  "SUBJ" by default }
   \item{percent}{ (Optional) When a subset is performed on the input data, if the number of rows remaining in the dataset after subset is less than \code{percent} \%, the function will issue a warning.  By default, 20\% is used }
@@ -35,7 +35,7 @@ createExternalCovariates(subjects, names, file, sameRow = TRUE,
 \value{
   A data frame containing the imported variables, and possibly a reference variable. 
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ 
   \code{\link{createContinuousCovariates}}, 
   \code{\link{createDiscreteCovariates}}, and 

@@ -5,7 +5,7 @@ test.data.missing.mcar <- function() {
     SUBJ = rep(1:3, each = 3), 
     TIME = rep(0:2, 3) )
   
-  checkTrue( all( createMCAR( tdata, prop = 0)$MISSING == 0 ))
+  checkTrue( all( createMCAR( tdata, prop = 0, flagName = "ABC")$ABC == 0 ))
   checkTrue( all( createMCAR( tdata, prop = 1)$MISSING == 1 ))
   
   checkException( createMCAR( tdata, prop = 100) )
@@ -98,21 +98,19 @@ test.data.checkDropuOutFun <- function(){
  doData <- createDropout(testData, dFun, prop=0.4, seed=10) 
  
  # tests about the drop out function  
- checkException( checkDropOutFun( max ), 
-   msg = "wrong function")  
-   
- checkException( checkDropOutFun( "ghost" ), 
-   msg = "does not exist")  
- 
- checkException( checkDropOutFun( ghost ), 
-   msg = "does not exist")  
-   
- checkException( checkDropOutFun( function(data, prop)  1:nrow(data), doData    ), 
+ checkException( checkDropOutFun( max ), msg = "wrong function")     
+ checkException( checkDropOutFun( "ghost" ), msg = "does not exist")  
+ checkException( checkDropOutFun( ghost ), msg = "does not exist")  
+ checkException( checkDropOutFun( function(data, prop)  1:nrow(data), testData ), 
    msg = "wrong function, does not generate 0,1,T,F")  
+ checkException( checkDropOutFun( function(data, prop)  stop("error"), doData), msg = "error occuring")  
+ checkTrue( checkDropOutFun( function(data, prop)  rep(1, nrow(data)), testData ))
+ checkException( checkDropOutFun( function(dta, prop)  rep(1, nrow(data)), testData ))
+ dFun <- function(data, ...) rep(1, 5)
+ checkTrue( checkDropOutFun( dFun, testData ))
+ checkException( checkDropOutFun( dFun, testData, useSubset = FALSE ))
+ checkException( checkDropOutFun( dFun, testData, sizeSubset = 6))
  
- checkException( checkDropOutFun( function(data, prop)  stop("error"), doData    ), 
-   msg = "error occuring")  
-  
 }
 
 

@@ -16,9 +16,9 @@ checkMacroFormat(data)
   A valid "Macro Evaluation" structure is an R data frame containing only 1 row of data.
 }
 \value{
-  No value returned. Only used for checking for valid macro dataset format.
+  Nothing. Only used for error generation side effects.
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ 
   \code{\link{analyzeData}}
 }

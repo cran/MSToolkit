@@ -4,7 +4,7 @@
 \title{ check the user supplied drop out function } 
 \description{
   This function performs checks to ensire that the user-supplied dropout 
-  function is valid.  
+  function is correct.  
 }
 \usage{
 checkDropOutFun(fun, data, sizeSubset = 5, useSubset= TRUE, ...)
@@ -19,13 +19,15 @@ checkDropOutFun(fun, data, sizeSubset = 5, useSubset= TRUE, ...)
 }
 \details{
   A correct dropout function must have at least a \code{data} argument, and
-  it must return a numeric vector containing the values 0 and 1 and have the same length as the number of rows in the input dataset. 
+  it must return a numeric vector containing the values 0 and 1 having as its length 
+  the number of rows of the dataset it is given. 
 }
 \value{
-  No value returned. Function only used for testing validity of the function.
+  Nothing. Function only used for the sied effect of generating an error 
+  if the function is not correct.
 }
 
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} } 
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \note{  
   if \code{useSubset} is set to TRUE, only a subset of the data 
   is used to perform the check. The size of the subset is then 

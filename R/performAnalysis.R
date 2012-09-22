@@ -1,17 +1,19 @@
-performAnalysis <- function(
-  analysisCode,  #@ File containing the actual analysis code to run on the data
-  doses,         #@ Doses for which estimates are expected
-  data,          #@ Input dataset
-  software = c("R","SAS"),      #@ Software for analysis: R or SAS
-  infile,        #@ Input file name for external call
-  subset. = NULL,        #@ Subsets to be applied to the data
-  dataChanges = NULL,   #@ Changes to be made to the data before analysis
-  seed=.deriveFromMasterSeed(), #@ Random number generation seed
-  workingPath = getwd()
+"performAnalysis" <- function(
+  analysisCode,  							#@ File containing the actual analysis code to run on the data
+  doses,         							#@ Doses for which estimates are expected
+  data,          							#@ Input dataset
+  software = c("R","SAS"),      			#@ Software for analysis: R or SAS
+  includeRows = NULL,   					#@ Changes to be made to the data before analysis
+  interimCol = getEctdColName("Interim"), 	#@ Interim variable name
+  doseCol = getEctdColName("Dose"), 	    #@ Dose variable name
+  seed = .deriveFromMasterSeed(), #@ Random number generation seed
+  workingPath = getwd(),
+  cleanUp = TRUE,
+  tempSasDir = tempdir()
 )
 {
   ###############################################################################
-  # � Mango Solutions, Chippenham SN14 0SQ 2006
+  # Mango Solutions, Chippenham SN14 0SQ 2006
   # performAnalysis.R Wed Jun 27 11:08:20 BST 2007 @464 /Internet Time/
   #
   # Author: Romain    
@@ -19,113 +21,102 @@ performAnalysis <- function(
   # DESCRIPTION: analyze a single replicate of data
   # KEYWORDS: component:analysis
   ###############################################################################
-  
+
   ## check that the software 
   software <- try( match.arg(software), silent = TRUE )
-  software %of% "try-error"  && ectdStop("The software should be `R` or `SAS`")
-    
+  if (class(software) == "try-error") ectdStop("The software should be `R` or `SAS`")
+
   switch( software, 
     "SAS" = {
-       # Ensure that the "infile" file exists
-       if (!file.exists(infile)) ectdStop("Cannot find replicate data file to analyze")
-       
-       # Set up parameters for the SAS call
-       if (length(subset.) == 1 && is.character(subset.) && gsub(" ", "", subset.) == "") subset. <- NULL
-       if (length(dataChanges) == 1 && is.character(dataChanges) && gsub(" ", "", dataChanges) == "") dataChanges <- NULL
-       if (length(subset.)) sasSubsets <- convertToSASCode(subset.) else sasSubsets <- "**** No subsets to apply ****;"
-       if (length(dataChanges)) sasChanges <- convertToSASCode(dataChanges) else sasChanges <- "**** No data changes to apply ****;" 
-  
-       # Set location for temporary CSV file
-       outfile <- paste(infile, ".temporary", sep="")
-       sasParameters <- paste(infile, outfile, file.path(workingPath, analysisCode), sasSubsets, sasChanges, seed, sep="#")
-       .log(paste("Calling SAS with execution string \"", sasParameters, "\"", sep=""))
-  
-       trySas <- .ectdSasCall(sasParameters)
-       trySas %of% "try-error"  && ectdStop("Problems occurred when calling SAS in batch mode (see SAS log file for more details)")
-       
-       # Call SAS
-       if (file.exists(outfile)) {
-         sasData <- read.csv(outfile)
-         sasData <- checkMicroFormat( doses = doses, dat = sasData )
-         try(file.remove(outfile))
-       }
-       else sasData <- createEmptyMicro( doses = doses )
-       return(sasData)
-    }, 
+
+		# Export the data to a file for SAS to use
+		infile <- file.path(tempSasDir, "sasDataInput.csv")
+		outfile <- file.path(tempSasDir, "sasDataOutput.csv")
+		write.csv(data, file = infile)			# Export data so SAS can read it
+		if (!file.exists(infile)) ectdStop("Cannot write replicate to an external CSV file")
+				
+		# Set up parameters for the SAS call
+		sasChanges <- convertSASIncludeRows(includeRows, doseCol = doseCol, interimCol = interimCol) 	# SAS 'keep rows' string
+		sasParameters <- paste(infile, outfile, file.path(workingPath, analysisCode), sasChanges, seed, sep="#")
+		.log(paste("Calling SAS with execution string \"", sasParameters, "\"", sep=""))
+
+		# Try to call SAS
+		trySas <- .ectdSasCall(sasParameters)
+		if (class(trySas) == "try-error") ectdStop("Problems occurred when calling SAS in batch mode (see SAS log file for more details)")
+
+		# Has the call been successful?
+		if (file.exists(outfile)) {
+			sasData <- try(read.csv(outfile))
+			if (class(sasData) == "try-error") ectdStop("Could not import SAS analysis output")
+			sasData <- checkMicroFormat( sasData, doseCol = doseCol )
+         	if (cleanUp) {
+				try(file.remove(outfile))
+		 		try(file.remove(infile))
+			}
+		}
+		else sasData <- NULL
+		
+		return(sasData)
+    },
     "R" = {
-      set.seed( seed )
+		# Set the seed
+		set.seed( seed )
+
+		# Get vector of doses for which statistics are expected
+		if (missing(doses)) doses <- unique( data[[doseCol]] )
+
+      	## apply the includeRows change if needed
+      	if (!is.null(includeRows)) data <- .keepAnalysisRows(data, includeRows, interimCol, doseCol)
+
+		## run the analysis code
+		if (class(analysisCode) == "function") analysisOutput <- try( analysisCode(data)  , silent = TRUE )
+		else {
+			if (length(analysisCode) == 1 && file.exists(file.path(workingPath, analysisCode))) { # Script
+				analysisOutput <- try(source(file.path(workingPath, analysisCode), local = TRUE)$value, silent = TRUE)
+				if (class(analysisOutput) == "try-error") ectdStop(paste("Could not perform analysis using script", file.path(workingPath, analysisCode)))			
+			}
+			else { 	# Character parse
+				analysisOutput <- try(eval(parse(analysisCode)), silent = TRUE)
+			}
+		}
+		out <- if( class(analysisOutput) == "try-error" ) {
+			ectdWarning("Error when executing analysis code: " %.nt% 
+				( analysisOutput %-~% "^[^:]*:") %.nt%    # extract the message from the `try`
+				"... creating an empty summary file" )
+
+			NULL
+      	}
+		else {
+        	checkMicroFormat( analysisOutput , doseCol = doseCol ) 
+    	}
       
-      ## apply the dataChanges if needed
-      if( !missing(dataChanges) ){
-        data <- .applyDataChanges( dataChanges, data )
-      }
-      
-      ## apply any subset. to the data
-      if( !missing(subset.) ){
-        subset. <- try( parseRangeCode( subset. ) ,silent =  TRUE )
-        subset. %of% "try-error" && ectdStop("Error when parsing the subset. code \n\t$subset.")
-        data <- try( data[ eval(subset., data) , ,drop = FALSE], silent = TRUE )
-        data %of% "try-error" && ectdStop( "Errors when applying the subset. :\n\t$data" )    
-      }
-      
-      if( missing(doses)) doses <- unique( data$DOSE )
-      
-      ## run the analysis code
-      if (class(analysisCode) == "function") analysisOutput <- try( analysisCode(data)  , silent = TRUE )
-      else analysisOutput <- try(eval(parse(analysisCode)), silent = TRUE)
-      
-      out <- if( analysisOutput %of% "try-error" ){
-        ectdWarning(
-          "Error when executing analysis code: " %.nt% 
-          ( analysisOutput %-~% "^[^:]*:") %.nt%    # extract the message from the `try`
-          "... creating an empty summary file" )
-        
-        createEmptyMicro( doses = doses )
-      } else {
-        checkMicroFormat( doses = doses, dat = analysisOutput ) 
-      }
-      
-      return( out )
+      	return( out )
     })
-     
-  
-  
-  
-  
-}
-
-.checkCorrectDataChanges <- function(
-  dataChanges,          #@ matrix of 3 columns describing the changes to make to the data
-  data = NULL,          #@ dataset
-  checkData = TRUE      #@ should we check the data?
-){
-  ## check the structure of the matrix  
-  if( !is.matrix(dataChanges) || !is.character(dataChanges) || ncol(dataChanges) != 3 ){
-    ectdStop("`dataChanges` must be a matrix with 3 columns")
-  }    
-
-  ## check that the target variables are in the data
-  if(checkData && dataChanges[,2] %!allin% names(data) ){
-    ectdStop("The target variables :" %.% paste( dataChanges[,2] %wo% names(data), collapse = ", " ) %.% "are not in the dataset"  )
-  }
-  
-}
-
-
-.applyDataChanges <- function(
-  dataChanges,  #@ matrix of 3 columns describing the changes to make to the data
-  data          #@ dataset
-){
-  if( missing(dataChanges) || is.null(dataChanges) ) return(data)
-  
-  .checkCorrectDataChanges( dataChanges, data )
-  
-  for( i in 1:nrow(dataChanges) ){
-    test <- try( data[ eval( parse(text=dataChanges[i,1]), data) , dataChanges[i,2] ] <- as.numeric( dataChanges[i,3] ) )
-    test %of% "try-error" && ectdStop("Error when applying the datachanges to the dataset\n\t$test")   
-  }
-  
-  data
 
 }
 
+".keepAnalysisRows" <- function(data, includeRows, interimCol, doseCol) {
+	###############################################################################
+	# Mango Solutions, Chippenham SN15 1BN 2009
+	#
+	# Author: Rich P
+	###############################################################################
+	# DESCRIPTION: Subsets data based on 2 column matrix
+	###############################################################################
+	
+	# Check the input structure
+	if (!is.matrix(includeRows) || ncol(includeRows) != 2) ectdStop("'includeRows' input should be a matrix with 2 columns")
+
+	# Function for pasting subsets
+	"innerPasteSubset" <- function(vec, interimCol, doseCol) paste("(", interimCol, "==", vec[1], "&", doseCol, "==", vec[2], ")")
+
+	# Perform the subset creation
+	outSub <- apply(includeRows, 1, innerPasteSubset, interimCol = interimCol, doseCol = doseCol)
+	outSub <- paste(outSub, collapse = " | ")
+	
+	# Try to apply the subset
+	myTest <- try(with(data, eval(parse(text = outSub))))
+	if (class(myTest) == "try-error" || !is.logical(myTest)) ectdStop("Could not execute subset statement on data")
+	if (!any(myTest)) ectdStop("No data to analyze following dose dropping")
+	data [ myTest, , drop = FALSE ]
+}

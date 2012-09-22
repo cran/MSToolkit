@@ -15,13 +15,12 @@ initialChar(txt, adm = "[:lower:]", err = "Not acceptable value")
   \item{adm}{ (Optional) Regular expression which may be used to restrict the set of letters which will be returned.  By default it will allow all lower case letters }
   \item{err}{ (Optional) The error message which will be printed if no admissable letters (as determined by adm) are found.  By default, message "Not acceptable value" will be displayed } 
 }
-
 \value{
-initalChar returns a lower case version of the first letter contained in the string \code{txt} if that character is admissable.  
+initalChar returns a lower case version of the first letter contained in the string "txt" if that character is admissable.  
 If it is not (or no letter is found), an error message will be printed.
 }
 
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \note{  
 This function is not case sensitive. 
 }

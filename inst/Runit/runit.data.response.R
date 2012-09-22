@@ -17,6 +17,12 @@ test.data.response.createResponseVariable <- function() {
  checkException( createResponseVariable( mtcars, "Sepal.Length+Species" )  )  
  checkException( createResponseVariable( mtcars, "{" )  )     
  
+ # Test the "pretest" functionality
+ preFalse <- try(createResponseVariable( mtcars, "cyl+", preTest = FALSE ), silent = TRUE)[1]
+ preTrue <- try( createResponseVariable( mtcars, "cyl+", preTest = TRUE ), silent = TRUE)[1]
+ checkTrue(length(grep("subset", preFalse)) == 0) 
+ checkTrue(length(grep("subset", preTrue)) > 0) 
+ 
 }    
 
 test.data.response.addResidualError <- function(){
@@ -34,9 +40,9 @@ test.data.response.addResidualError <- function(){
   checkException( addResidualError( resp, "1", errStruc = myf) )
  
   ## seed test
-  r1 <- addResidualError( resp, "1", errStruc = "a", seed = 1 )
+  r1 <- addResidualError( resp, "1", errStruc = "A", seed = 1 )
   junk <- rnorm(100) + runif(100)
-  r2 <- addResidualError( resp, "1", errStruc = "a", seed = 1 )
+  r2 <- addResidualError( resp, "1", errStruc = "A", seed = 1 )
   checkTrue( all(r1 == r2 ) ) 
   
 }

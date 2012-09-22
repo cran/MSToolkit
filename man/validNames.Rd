@@ -21,7 +21,7 @@
   None. The function is simply generates an error if an invalid name is passed to it.
 }
 
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} } 
 \examples{
   # correct name
   validNames("DOSE")

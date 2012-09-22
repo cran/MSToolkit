@@ -18,10 +18,11 @@ checkSymmetricPDMatrix <- function( mat, tol = 1e-6 ){
   if( any( mat != t(mat) ) ) 
     ectdStop( "matrix not symmetric" )
   
-  ev <- eigen(mat, sym = TRUE, EISPACK = TRUE, only.values = TRUE)$values
+  ev <- eigen(mat, symmetric = TRUE, only.values = TRUE)$values
     
   # This test for positive-definiteness was found in the function mvrnorm
   if (!all(ev >= -tol * abs(ev[1]))) 
       ectdStop("matrix not positive definite")
   
 }
+

@@ -8,12 +8,13 @@
   the analysis at this interim stage.
 }
 \usage{
-interimAnalysis(data, interimCode)
+interimAnalysis(data, interimCode, uniqueDoses = NULL)
 }
 
 \arguments{
   \item{data}{ (Required) Dataset to analyze  }
   \item{interimCode}{ (Required) Function to execute against the data that should produce a list structure as described below}
+  \item{uniqueDoses}{ Unique study doses}
 }
 \value{
   The output of the interim code should be an R "list" structure.  
@@ -22,12 +23,12 @@ interimAnalysis(data, interimCode)
 
   If the return list contains a "STOP" element, and the "STOP" element is a logical value of length 1, this will be used to determine whether the trial should be stopped at this interim.
   
-  If the return list contains a "DROP" element, and the "DROP" element is a vector of dose values, this will be used to determine which doses to drop before the next interim. Note that the function uses DOSE as opposed to TRT for determining which treatment arms to drop.
+  If the return list contains a "DROP" element, and the "DROP" element is a vector of dose values, this will be used to determine which doses to drop before the next interim.
   
   Any list elements other than "DROP" or "STOP" will be ignored.
 }
 
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 
 \examples{
   myData <- data.frame(DOSE=c(0, 15, 30), TEST = 1:3)

@@ -1,4 +1,4 @@
-if( !exists("unitTestPath")) unitTestPath <- "."
+if( !exists("unitTestPath")) unitTestPath <- system.file(package = "MSToolkit", "Runit")
 macro.datapath <- file.path( unitTestPath , "data", "macroEvaluation" )
 
 

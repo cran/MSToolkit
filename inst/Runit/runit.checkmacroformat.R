@@ -5,5 +5,7 @@ test.checkMacroFormat <- function(){
     
   checkException( checkMacroFormat( iris[1:10, ]), 
     msg = "more than one row")  
+
+ checkTrue(checkMacroFormat(data.frame(x =1 )))
 }
 

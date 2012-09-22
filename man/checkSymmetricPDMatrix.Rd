@@ -13,9 +13,10 @@
   \item{tol}{ (Optional) The tolorence to use when comparing the value to 0.  The default is "1e-06" }
 }
 \value{
-  No value returned. Only used in checks.
+  The function does not return anything. It only generate an error 
+  if something goes wrong.
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \examples{\dontrun{
   checkSymmetricPDMatrix( diag(4), 4)
   \dontrun{

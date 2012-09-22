@@ -7,8 +7,10 @@
   a replicate dataset at each step defined by the interims.
 }
 \usage{
-performAnalysis(analysisCode, doses, data, software = c("R", "SAS"), infile, 
-  subset., dataChanges, seed = .deriveFromMasterSeed(), workingPath = getwd())
+performAnalysis(analysisCode, doses, data, software = c("R", "SAS"),  
+  includeRows = NULL, interimCol = getEctdColName("Interim"), 
+  doseCol = getEctdColName("Dose"), seed = .deriveFromMasterSeed(), 
+  workingPath = getwd(), cleanUp = TRUE, tempSasDir = tempdir())
 }
 
 \arguments{
@@ -16,23 +18,25 @@ performAnalysis(analysisCode, doses, data, software = c("R", "SAS"), infile,
   \item{doses}{ (Required) Vector of doses for which estimates are expected }
   \item{data}{ (Required) Input dataset on which to perform analysis }
   \item{software}{ (Optional) Software for analysis: "R" or "SAS" (default is "R") }
-  \item{infile}{ (Optional) Input file name for external call. Only meaningful in the SAS context.  Required for calls to SAS }
-  \item{subset.}{ (Optional) Subsets to be applied to the data before doing any analysis.  By default, no subsets are applied }
-  \item{dataChanges}{ (Optional) Changes to be made to the data before analysis. Typically these are changes due to the interim code. See \code{\link{interimAnalysis}}}
+  \item{includeRows}{ (Optional) 2 column matrix specifying interims and doses to include in analysis.  By default, no subsets are applied }
+  \item{interimCol}{ Interim flag column name }
+  \item{doseCol}{ Dose column name }
   \item{seed}{ (Optional) Random number generation seed.  By default, this is derived from the current random seed }
   \item{workingPath}{ (Optional) Working directory for the analysis.  The default is the current working directory }
+  \item{cleanUp}{ (Optional) Logical: Should we remove the files that have been passed in and out of SAS? }
+  \item{tempSasDir}{ Temporary Sas Directory }
 }
 \details{
   The function tries to perform the analysis contained in the \code{analysisCode} against the \code{data}.  
-  The \code{analysisCode} specified is either an external file containing code (SAS and R), or an R function (R only).
+  The analysis code specified is either an external file containing code (SAS and R), or an R function (R only).
   
-  If software is set to "SAS" the analysis code is assumed to be a reference to an external SAS script.  The SAS code must accept a singe dataset called work.infile, and create an output dataset called work.outfile.  The work.outfile dataset must be a valid "Micro Evaluation" structure as specified in the help file for \code{\link{checkMicroFormat}}.
+  If software is set to "SAS" the analysis code is assumed to be a reference to an external SAS script.  The SAS code must accept a single dataset called work.infile, and create an output dataset called work.outfile.  The work.outfile dataset must be a valid "Micro Evaluation" structure as specified in the help file for \code{\link{checkMicroFormat}}.
   If the software is "R", the analysis code input must be either an R function or an R script.  The R analysis code must also return a valid "Micro Evaluatoin" structure as specified in function \code{\link{checkMicroFormat}} 
 }
 \value{
 The function should output a valid "Micro Evaluation" data structure as specified in the \code{\link{checkMicroFormat}} help file.
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ \code{\link{checkMicroFormat}}}
 \examples{\dontrun{
   

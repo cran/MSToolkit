@@ -2,12 +2,12 @@
 \alias{createInterims}
 \title{ create the interim flag }
 \description{
-  \code{createInterims} partitions the data into interim analysis subsets and creates the "INTERIM" flag that identifies 
+  That function creates the \emph{INTERIM} flag that identifies 
   which subject is included in the analysis at every interim stage. 
 }
 \usage{
 createInterims(subjects, proportion, seed = .deriveFromMasterSeed(), 
-  idCol = "SUBJ", interimCol = "INTERIM", method = "Sample")
+  idCol = getEctdColName("Subject"), interimCol = getEctdColName("Interim"), method = "Sample")
 }
 \arguments{
   \item{subjects}{ (Required) Vector of subjects or number of subjects }
@@ -15,16 +15,16 @@ createInterims(subjects, proportion, seed = .deriveFromMasterSeed(),
   \item{seed}{ (Optional) The random number generation seed to use.  By default, this is derived from the current random seed }
   \item{idCol}{ (Optional) Name of the subject column ("SUBJ" by default) }
   \item{interimCol}{ (Optional) Name of the interim column ("INTERIM" by default) }
-  \item{method}{ (Optional) Method to use. Must be one of "Sample" or "Proportion".  Default is "Sample" }
+  \item{method}{ (Optional) Method to use. Must be one of \emph{Sample} or \emph{Proportion}.  Default is \emph{Sample} }
 }
 \details{
-  If the \code{method} argument is set to "Sample", the interim numbers should be assigned using the following algorithm:
+  If the "method" argument is set to "Sample", the interim numbers should be assigned using the following algorithm:
 Store the number of subjects (nSubjects) and the number of interims (nInterims)
 Append a zero to the start of the proportions and take differences to get a vector of "non-cumulative" probabilities
 Take "nSubjects" samples from the values "1" to "nInterims" with probabilities set to the derived "non-cumulative" probabilities
 Replace the "interim" variable with these values.
 
-If the \code{method} argument is set to "Proportion", the interim numbers should be assigned using the following algorithm:
+If the "method" argument is set to "Proportion", the interim numbers should be assigned using the following algorithm:
 Store the number of subjects (nSubjects) and the number of interims (nInterims)
 Convert the cumulative proportions to "non-cumulative" probabilities
 Allocate a "base" number of subjects to each interim (found by multiplying nSubjects by the set of probabilities, then take the floor of the resulting values)
@@ -36,7 +36,7 @@ If any subjects are left at this stage, use the "sample" method (below) to alloc
   \item{SUBJ}{Subject identifier, named after \code{idCol}.}
   \item{INTERIM }{Interim flag, named after \code{interimCol}.}
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ \code{\link{generateData}} }
 \examples{
   # first interim with 10% of the subjects

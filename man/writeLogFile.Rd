@@ -24,7 +24,7 @@ writeLogFile(jobStatuses, startingTime, logFileName = "jobstatus.log",
   None.
 }
 
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} } 
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \examples{
  \dontrun{ 
     jstatuses <- sample(c("PEND", "RUN", "DONE", "EXIT"), 10, replace = TRUE)

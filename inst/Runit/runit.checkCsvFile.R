@@ -1,4 +1,4 @@
-if( !exists("unitTestPath")) unitTestPath <- "."
+if( !exists("unitTestPath")) unitTestPath <- system.file(package = "MSToolkit", "Runit")
 testDir <- file.path( unitTestPath, "testdata.supportfunctions" )
 
 # Author: Francisco
@@ -27,6 +27,3 @@ test.readAndCheckCsvFile <- function()
       msg = "Variable SD is missing, is actually called SE") 
   }
 }                  
-
-test.readAndCheckCsvFile()
-                                                                        

@@ -23,7 +23,7 @@ createEmptyMicro(doses, doseCol = "DOSE", microColumnNames = c("doseName" = dose
 \value{
 	createEmptyMicro returns a data frame that is as described above.
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \note{ Future versions of MSToolkit will relax the format of the MicroEvaluation dataset allowing a more free structure for this dataset. }
 \seealso{\code{\link{checkMicroFormat}}  }
 \examples{

@@ -7,8 +7,8 @@
 }
 \usage{
 createDropout(data, dropFunc, 
-  seed = .deriveFromMasterSeed(), idCol = "SUBJ",
-  timeCol = "TIME", flagName = "MISSING", ...)
+  seed = .deriveFromMasterSeed(), idCol = getEctdColName("Subject"),
+  timeCol = getEctdColName("Time"), flagName = getEctdColName("Missing"), ...)
 }
 
 \arguments{
@@ -21,7 +21,7 @@ createDropout(data, dropFunc,
   \item{\dots}{ (Optional) Extra arguments to be passed directly to the dropout function.  No arguments are passed by default }
 }
 \details{
-  This function will accept (and check) a "dropout" function \code{dropFunc}, which is to applied to the data.  This function must return a boolean vector.
+  This function will accept (and check) a "dropout" function, which is to applied to the data.  This function must return a boolean vector.
   The dropout function supplied will be applied to the data provided (possibly with extra arguments supplied with the ellipses).
   Once a boolean vector is returned, the function will ensure dropout is "retained" over time within subject (so if a subject drops out at visit 1, he/she is also missing at visits 2, 3 etc.).
   This "retained" boolean vector is added to the dataset (or used to enhance an existing "missing" flag) and the updated data is returned.
@@ -29,7 +29,7 @@ createDropout(data, dropFunc,
 \value{
   An updated data frame with added/updated "missing" column
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{\code{\link{checkDropOutFun}} and \code{\link{createMCAR}}}
 \examples{
 \dontrun{

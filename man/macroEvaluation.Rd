@@ -7,17 +7,17 @@
   replicate of data.
 }
 \usage{
-macroEvaluation(data, macroCode, interimCol = "INTERIM", doseCol = "DOSE")
+macroEvaluation(data, macroCode, interimCol = getEctdColName("Interim") , doseCol = getEctdColName("Dose"))
 }
 
 \arguments{
   \item{data}{ (Required) Data set to use, typically returned from a micro evaluation step. }
-  \item{macroCode}{ (Required) Code used to summrize the micro data. }
+  \item{macroCode}{ (Required) Function used to summarize the micro data.  If the function has arguments "doseCol" and/or "interimCol", the arguments to macroEvaluation are passed to it in addition to the data }
   \item{interimCol}{ (Optional) Name of the interim column, should be a valid name ("INTERIM" by default). See \code{\link{validNames}} }
   \item{doseCol}{ (Optional) Name of the dose column, should be a valid name ("DOSE" by default). See \code{\link{validNames}} } 
 }
 \details{
-  The macro code is first studied to make sure that it is a valid R function that takes a \code{data} argument. 
+  The macro code is first studied to make sure that it is a function that takes a \code{data} argument. 
   The code is then executed against the micro data, and should produce a data frame containing a single 
   row. This is further checked using the \code{\link{checkMacroFormat}} function.
 }
@@ -25,7 +25,7 @@ macroEvaluation(data, macroCode, interimCol = "INTERIM", doseCol = "DOSE")
   A data frame that complies with \code{\link{checkMacroFormat}}
 }
 
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} } 
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \examples{
   # example of micro data with interim
   microData <- read.csv( 

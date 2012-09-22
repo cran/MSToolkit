@@ -6,7 +6,7 @@ Writes a single element of scenario data (replicate, micro evaluation or macro e
 }
 \usage{
 writeData(dat, dataNumber, dataType = c("ReplicateData", "MacroEvaluation", "MicroEvaluation"), 
- workingPath = getwd(), append = FALSE)
+ workingPath = getwd(), append = FALSE, prefix = switch(dataType, ReplicateData = "replicate", MicroEvaluation = "micro", MacroEvaluation = "macro"), method = getEctdDataMethod())
 }
 
 \arguments{
@@ -15,11 +15,13 @@ writeData(dat, dataNumber, dataType = c("ReplicateData", "MacroEvaluation", "Mic
   \item{dataType}{ (Optional) The type of data to be written - this must be either "MacroEvaluation" "MicroEvaluation" or "ReplicateData" (default is "ReplicateData") }
   \item{workingPath}{ (Optional) The path of the current scenario.  The working directory is used by default }
   \item{append}{ (Optional) A logical value.  If the file for the entry of data you are specifying already exists, setting append to TRUE will cause writeData to append to the end of that file.  Otherwise it will overwrite the file.  The default is FALSE }
+  \item{prefix}{ (Optional) Prefix for exported file name }
+  \item{method}{ (Optional) Data storage method (i.e. where to extract the data from).  Given by \link{getEctdDataMethod} by default }
 }
 \value{
   Returns TRUE if the file was successfully created
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{\code{\link{readData}}}
 \examples{
   \dontrun{

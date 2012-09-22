@@ -1,16 +1,25 @@
-\name{ectdVerbose}
-\alias{ectdVerbose}
-\alias{ectdLogFile}
-\alias{ectdDateFormat}
+\name{setEctdVerbose}
+\alias{setEctdVerbose}
+\alias{setEctdLogFile}
+\alias{setEctdDateFormat}
+\alias{getEctdVerbose}
+\alias{getEctdLogFile}
+\alias{getEctdDateFormat}
 \title{ MSToolkit package options }
 \description{
   Options used by the MSToolkit package to control the logfile, the amount of messages
   that are written in the logfile, and the format of the date. 
 }
 \usage{
- ectdVerbose(verbose)
- ectdLogFile(file)
- ectdDateFormat(format)
+
+ setEctdVerbose(verbose)
+ setEctdLogFile(file)
+ setEctdDateFormat(format)
+
+ getEctdVerbose()
+ getEctdLogFile()
+ getEctdDateFormat()
+
 }
 
 \arguments{
@@ -26,21 +35,21 @@
 \value{
   The function (invisibly) returns the previous value of the arguments.
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ \code{\link{options}} provides a similar mechanism for R options.}
 \examples{\dontrun{
-  oldverb <- ectdVerbose( TRUE )
-  olddf   <- ectdDateFormat("%Y")
-  oldlf   <- ectdLogFile("mstoolkit.log")
+  oldverb <- setEctdVerbose( TRUE )
+  olddf   <- setEctdDateFormat("%Y")
+  oldlf   <- setEctdLogFile("mstoolkit.log")
   
   for( i in 1:100 ) {
     MSToolkit:::.log( paste("some message:", i) )
   }
-  file.show( ectdLogFile() )
+  file.show( getEctdLogFile() )
   
-  ectdVerbose   (oldverb)
-  ectdDateFormat(olddf  )
-  ectdLogFile   (oldlf  )
+  setEctdVerbose   (oldverb)
+  setEctdDateFormat(olddf  )
+  setEctdLogFile   (oldlf  )
  
 }}
 \keyword{ IO }

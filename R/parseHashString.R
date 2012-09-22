@@ -17,7 +17,7 @@ parseHashString <- function(
  
   ## check if there is anything to do   
   if( is.null(input) ) return(input) 
-  if( !is.list(input) && input %~% "\\#" ) {
+  if( !is.list(input) && any( regexpr("\\#", input)  > 0 )  ) {
     input <- as.list( unlist( strsplit(input, "\\#+") ) )
   }
   out <-  lapply( input, parseCharInput, ... )

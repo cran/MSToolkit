@@ -1,12 +1,14 @@
-createDirectories <- function(  
-  dirNames = c("ReplicateData", "MicroEvaluation", "MacroEvaluation"), #@ A vector containing the full names of the directories to be created.
-  workingPath = getwd(), #@ Directory in which to create directories
-  warn = FALSE           #@ Should the dir.create function show warnings?
-) 
+createDirectories <- function(
+  dirNames = c("ReplicateData", "MicroEvaluation", "MacroEvaluation"), 		#@ A vector containing the full names of the directories to be created.
+  workingPath = getwd(), 													#@ Directory in which to create directories
+  warn = FALSE,          													#@ Should the dir.create function show warnings?
+  method = getEctdDataMethod()   											#@ Data Storage Method to use
+)
 {
   ###############################################################################
-  # Mango Solutions, Chippenham SN14 0SQ 2006
-  # createDirectories.R 20/06/2007 15:28:29 BST 2007 @445 /Internet Time/
+  # Mango Solutions, Chippenham SN15 1BN 2009
+  # createDirectories.R 03DEC09
+  #
   # Author: Francisco
   ###############################################################################
   # DESCRIPTION: Tries to create named subdirectories for storing replicate, micro 
@@ -14,20 +16,39 @@ createDirectories <- function(
   # the success or failure of directory creation
   # KEYWORDS: IO
   ###############################################################################
-  
+
   # Quit if the list is too short
   if(!length(dirNames)) ectdStop("No directories to create")
-  
+
   # Match directory name against expected inputs
   dirNames <- match.arg(dirNames, several.ok = TRUE)
-  
-  # Create full directory paths
-  fullPaths <- file.path(workingPath, dirNames)
 
-  # Create directories using the "dir.create" function
-  result <- sapply(fullPaths, dir.create, showWarnings = warn)
-  
-  # Log the creation of the directories
-  if (any(result)) .log(paste("Created directory", fullPaths[result]))
-  return(result)	
+  # Match data storage method against recognised methods
+  method <- match.arg(method, c("CSV", "RData", "Internal"))
+
+  # Loop around if more than 1 directory
+  if (length(dirNames) > 1) {
+	 checkTrue <- c()
+	 for (i in 1:length(dirNames)) checkTrue[i] <- createDirectories(dirNames[i], workingPath = workingPath, warn = warn, method = method)
+	 return(checkTrue)
+  }
+  else {
+	  # If we're only dealing with Micro/Macro, we should be using CSV method
+	  if (substring(dirNames, 1, 1) == "M") method <- "CSV"
+
+	  # Create physical directories
+	  if (method %in% c("CSV", "RData")) {
+		  
+		  # Create full directory paths
+		  fullPath <- file.path(workingPath, dirNames)
+		  
+		  # Create directories using the "dir.create" function
+		  result <- dir.create(fullPath, showWarnings = warn)
+
+		  # Log the creation of the directories
+		  if (result) .log(paste("Created directory", fullPath))
+		  return(result)
+	  }
+	  else return(TRUE)  # Don't need to create directories for "Internal" storage
+  }	
 }

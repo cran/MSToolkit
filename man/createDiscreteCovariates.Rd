@@ -2,17 +2,17 @@
 \alias{createDiscreteCovariates}
 \title{ Create covariates from a discrete distribution }
 \description{
-  Creates discrete covariates based on a matrix specifying the probability of each outcome or combinations of outcomes.
+Create covariates from a discrete distribution 
 }
 \usage{
 createDiscreteCovariates(subjects, names, values, probs, probArray, 
-  seed = .deriveFromMasterSeed(), idCol = "SUBJ", includeIDCol = TRUE)
+  seed = .deriveFromMasterSeed(), idCol = getEctdColName("Subject"), includeIDCol = TRUE)
 }
 \arguments{
   \item{subjects}{ (Required) Vector of subjects (or number of subjects) for which to create covariates }
   \item{names}{ (Required) Names of the discrete covariates to be created.  All the names should be valid R names. See \code{link{validNames}}.}
   \item{values}{ (Required) Values that the covariates can take. See details section. }
-  \item{probs}{ (Optional) Probabilities for each covariate value. See details section. }
+  \item{probs}{ (Optional) Probabilities for each covariates. See details section. }
   \item{probArray}{ (Optional) Probability array for uneven sampling. See details section. }
   \item{seed}{ (Optional) Random seed to use.  By default, it is based on the current random seed }
   \item{idCol}{ (Optional) Name of the subject column.  Must be a valid R name (see \code{\link{validNames}}) and not be duplicated with any \code{names}.  "SUBJ" by default }
@@ -20,9 +20,9 @@ createDiscreteCovariates(subjects, names, values, probs, probArray,
 }
 \details{
   The \code{values} and \code{probs} argument are parsed using the \code{\link{parseHashString}} helper
-  function. They could be either:
- 
+  function. They could be either : 
   - a vector giving the values for each variable. 
+  
   \code{c("1,2", "1,2,3")} would mean that the first variable takes values 1 and 2, 
   and the second variable takes values 1, 2 and 3.
   
@@ -33,20 +33,22 @@ createDiscreteCovariates(subjects, names, values, probs, probArray,
   - a compact notation using the hash symbol to separate variables
   \code{"1,2#1,2,3"}
   
-  Additionally for the \code{probs} argument, a check is performed to make sure that probability sums to 1 for each variable.
+  Additionally for the \code{probs} argument, a check is performed to make sure that each 
+  variable probability sums to 1.
   
   Alternatively, a \code{probArray} argument can be given. This should be a data frame containing 
   one more column (named "prob") than the number of variables to create. Each variable has a column
   which contains the values it can take. The prob column gives the probability for each combination.
-  See examples. The "prob" column should sum up to one.
+  See examples. The prob column should sum up to one.
 }
 \value{
   A data frame.
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ 
   \code{\link{createContinuousCovariates}}, 
-  \code{\link{createExternalCovariates}}, and 
+  \code{\link{createExternalCovariates}},  
+  \code{\link{createTimeVaryingCovariates}}, and
   \code{\link{createCovariates}}
 }
 \examples{

@@ -5,9 +5,8 @@ OPTIONS mprint ;
 %let infile  = %scan(&sysparm,1,'#');
 %let outfile = %scan(&sysparm,2,'#');
 %let code    = %scan(&sysparm,3,'#');
-%let subset  = %scan(&sysparm,4,'#');
-%let changes = %scan(&sysparm,5,'#');
-%let seed    = %scan(&sysparm,6,'#');
+%let changes = %scan(&sysparm,4,'#');
+%let seed    = %scan(&sysparm,5,'#');
 
 proc import datafile = "&infile" out = work.infile dbms = dlm replace;
 delimiter=',';
@@ -19,10 +18,6 @@ options mprint ;
 data infile; set infile;
 seed = &seed;
 &changes;
-run;
-
-data infile; set infile;
-&subset;
 run;
 
 %INCLUDE "&code" ;

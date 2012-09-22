@@ -24,7 +24,7 @@ parseCharInput(input, convertToNumeric = TRUE, sort = FALSE,
 \value{
   A numeric vector or a character vector depending on the \code{convertToNumeric} flag.
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ \code{\link{parseHashString}} uses \code{parseCharInput} sequentially. }
 \examples{
   parseCharInput( "1,2,4")

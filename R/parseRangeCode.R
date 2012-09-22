@@ -13,7 +13,7 @@ parseRangeCode <- function(
   if(missing(code) || is.null(code) ) return(NULL)
   
   ## handle the if
-  if( code %~% "\\|" )
+  if( any( regexpr("\\|", code)  > 0 )  )
     ectdStop( "`|` not allowed in the range code" )
   
   code <- unlist( strsplit( code, "[;&,]" ) )
@@ -40,7 +40,7 @@ parseRangeCode <- function(
   ## paste and parse the code
   out <- paste( "(", out , ")", sep = "", collapse = "&") %-~% "[[:space:]]" 
   result <- try( parse( text = out ),  silent = TRUE )
-  if( result %of% "try-error" ) {
+  if( class(result) == "try-error" ) {
     ectdStop('parsing problem: ' %.% ( result %-~% "^[^:]*:" )     ) 
   }  
   result 

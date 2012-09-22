@@ -36,3 +36,22 @@ test.data.allocate.names <- function(){
  checkException( allocateTreatments( trts = 6, subjects = 100, trtCol = "XX", idCol = "XX") )  
 }
 
+
+test.data.allocate.vectorOfVals <- function(){
+	al <- allocateTreatments( trts = 1:2, subjects = 10 )
+	checkTrue( all(1:2 %in% al$TRT))
+}
+
+test.data.allocate.repeatedTreatments <- function() {
+	
+	generateData(5, 20, treatSubj = c(3, 4, 3), treatDoses = c(0, 15, 30), respEqn = "DOSE")
+	x <- readAllData()
+	checkTrue( all(sapply(split(x$TRT, x$Replicate), function(x) all(x[1:10] == x[11:20]))) )
+	checkTrue( !all( x$TRT [ x$Replicate == 1 ] == x$TRT [ x$Replicate == 2 ]) )
+
+	generateData(5, 20, treatSubj = c(3, 4, 3), treatDoses = c(0, 15, 30), respEqn = "DOSE", treatDiff = FALSE)
+	x <- readAllData()
+	checkTrue( all(sapply(split(x$TRT, x$Replicate), function(x) all(x[1:10] == x[11:20]))) )
+	checkTrue( all( x$TRT [ x$Replicate == 1 ] == x$TRT [ x$Replicate == 2 ]) )
+	
+}

@@ -27,7 +27,7 @@
 }
 
 .deriveFromMasterSeed <- function(){
-  sample(1:999, 1) 
+	sample(1:999, 1) 
 }
  
 ### regular expression toys
@@ -47,7 +47,7 @@
   out <- spl[1]
   for( i in seq( along = va )) {
     varName <- try( get(va[i], pos = parent.frame(2) )[1] ,silent = TRUE )
-    if( varName %of% "try-error") varName <- va[i]
+    if( class(varName) == "try-error") varName <- va[i]
     out <- out %.% varName  %.% spl[i+1]
   }
   out
@@ -79,50 +79,53 @@
   subjects
 }
 
-.handleProbArray <- function( probArray, values, probs){
-  
-  if( !missing(probArray) && is.matrix(probArray) ){
-    sum(probArray) == 1 || ectdStop("`probArray` does not sum up to one")
-    if( missing(values) ) { 
-      values <- dimnames(probArray)
-      if( is.null(values) ){
-        values <- sapply( dim(probArray), seq)
-      }
-    }
-    if( !all(  dim(probArray)  == sapply(values, length)  )) 
-      ectdStop("Dimension problem between `probArray` and `values`")
-    out <- cbind( do.call( expand.grid, values ), probs = as.vector( probArray) )
-    out <- subset( out, probs > 0)
+.handleProbArray <- function( probArray, values, probs) {
+	if( !missing(probArray) && is.matrix(probArray) ) {
+		sum(probArray) == 1 || ectdStop("`probArray` does not sum up to one")
+		if( missing(values) ) {
+			values <- dimnames(probArray)
+			if( is.null(values) ) {
+				values <- sapply( dim(probArray), seq)
+			}
+		}
+		if( !all(  dim(probArray)  == sapply(values, length)  )) ectdStop("Dimension problem between `probArray` and `values`")
+		out <- cbind( do.call( expand.grid, values ), probs = as.vector( probArray) )
+		out <- subset( out, probs > 0)
+		
+	} else { 
+		## make tests on the probArray or build it
+    	if ( missing(probArray) ) {
+			# try to build it
+			if(missing(values) || missing(probs) ) ectdStop("`values` and `probs` must be supplied if probArray is missing")
+			probArray <- probs[[1]]
+			lp <- length(probs)
+			if(lp>1) {
+				for(idx in 2:lp) {
+					probArray <- probArray %o% probs[[idx]]
+				}
+			}
+		} else {
+			# check the probArray
+			if (is.data.frame(probArray)) {
+				if(sum(probArray[,ncol(probArray)]) != 1) ectdStop("the probArray does not sum up to one")
+				if(ncol(probArray) - 1 != length(values)) ectdStop("The `probArray` has wrong dimensions")
+			}
+			
+			if (is.array(probArray)) {
+				if(sum(probArray) != 1) ectdStop("the probArray does not sum up to one")
+				if(length(dim(probArray)) != length(values)) ectdStop("The `probArray` has wrong dimensions")
+			}
+			
+		}
     
-  } else { 
-  
-  
-    ## make tests on the probArray or build it
-    if( missing(probArray) ){ # try to build it
-      if(missing(values) || missing(probs) )
-        ectdStop("`values` and `probs` must be supplied if probArray is missing")
-      probArray <- probs[[1]]
-      lp <- length(probs)
-      if(lp>1){
-        for(idx in 2:lp){
-          probArray <- probArray %o% probs[[idx]]
-        }
-      }
-    } else {   # check the probArray
-      if(sum(probArray[,ncol(probArray)]) != 1)
-        ectdStop("the probArray does not sum up to one")
-      if(length(dim(probArray)) != length(values))
-        ectdStop("The `probArray` has wrong dimensions")
-    }
-    
-    ## make the grid                               
-    out <- cbind( do.call( expand.grid, values ), PROB = as.vector(probArray) )
-  }
-  ## make sure they are all factors
-  for( va in 1:length(values)){
-    out[,va] <- factor(out[,va])
-  }
-  out
+		## make the grid                               
+		out <- cbind( do.call( expand.grid, values ), probs = as.vector(probArray) )
+	}
+	## make sure they are all factors
+	for( va in 1:length(values)) {
+		out[,va] <- factor(out[,va])
+	}
+	out
 }
 
 .eval <- function( txt ){
@@ -133,52 +136,50 @@
   cat( "\n\nFunction `"%.% as.character(match.call()[1]) %.% "` not yet implemented\n\n" ) 
 }
 
-.log <- function( ... , file = ectdLogFile(), verbose = ectdVerbose()){
+.log <- function( ... , file = getEctdLogFile(), verbose = getEctdVerbose()){
   if( verbose ){ 
     msg <- paste( ..., "\n", sep = "" )
     msg <- .strinterp( msg )
-    msg <- sprintf( "[%s] %s", format( Sys.time(), ectdDateFormat() ) , msg )
+    msg <- sprintf( "[%s] %s", format( Sys.time(), getEctdDateFormat() ) , msg )
     cat( msg, file = file, append = TRUE)
   }
   invisible( NULL )
 }
 
-.checkFun <- function(
-  fun, 
-  expectedArgs
+".checkFun" <- function(
+	fun, 
+	expectedArgs
 ){
-
-  fun <- try( eval( match.fun(fun), parent.frame() ), silent = TRUE )
-  if(fun %of% "try-error") 
-    ectdStop("not a valid function")   
-  if( !missing(expectedArgs) ){  
-    expectedArgs <- parseCharInput( expectedArgs, convertToNumeric = FALSE )           
-    if( expectedArgs %!allin% names(formals(fun)) ) 
-      ectdStop("Problem with the arguments of the function")
-  }
-  fun
-
-
+	fun <- try( eval( match.fun(fun), parent.frame() ), silent = TRUE )
+	if (class(fun) == "try-error") ectdStop("not a valid function")   
+	if( !missing(expectedArgs) ){  
+		expectedArgs <- parseCharInput( expectedArgs, convertToNumeric = FALSE )           
+		if( !all(expectedArgs %in% names(formals(fun))) ) 
+			ectdStop("Problem with the arguments of the function")
+	}
+	fun
 }
-
-.checkReplicates <- function( replicates, workingPath = getwd() ){
- 
-  ## Ensure the replicate files exist
-  if( is.character(replicates) ){
-    length( replicates) == 1 || ectdStop("replicates must be of length one if it is a character vector")  
-    repFiles <-  dir("ReplicateData", pattern = "[0-9]{4}\\.csv$", full = TRUE)
-    length(repFiles) > 0 || ectdStop( "The replicate director was not found or is empty" )
-    replicates <- as.numeric( gsub( ".*([0-9]{4})\\.csv", "\\1", repFiles ) )
-  } 
-  else { ## them replicates is a numeric vector   
-    repFiles <- .dataGetFullPath( replicates, dataType="Replicate", workingPath = workingPath)
-    ectdStop("Some replicate data files do not exist") %unless%  all(file.exists( repFiles ))
-  }                              
-  replicates 
+".checkReplicates" <- function( replicates, workingPath = getwd(), method = getEctdDataMethod() )
+{
+	## Ensure the replicate files exist
+	repsExist <- try(getReplicates(workingPath = workingPath, method = method), silent = TRUE)
+	if (class(repsExist) == "try-error") ectdStop("No replicates found")
+	if (is.character(replicates)) {
+		if (length(replicates) == 1 && replicates == "*") return(repsExist)
+		else ectdStop("'replicates' input in the wrong format")
+	}
+	else {
+		if (is.numeric(replicates)) {
+			if (!all(replicates %in% repsExist)) ectdStop("Could not find all replicates specified")
+			else return(replicates)
+		}
+		else ectdStop("'replicates' input must be a numeric vector or a single character ('*')")
+	}
+	NULL
 }
 
 .checkGridAvailable <- function(){
-  .Platform$OS.type != "windows" && suppressWarnings(require(Rlsf, quietly=TRUE))
+  suppressWarnings(require(foreach, quietly = TRUE) &&  (require(doSNOW, quietly = TRUE) || require(doParallel, quietly = TRUE))) 
 }
 
 .splitGridVector <- function(vec, nReps = 100) {
@@ -189,45 +190,20 @@
   split(vec, startVec)
 }
 
-".ectdSubmit" <- function(func, ..., savelist=c(), packages=NULL, ncpus=1, debug=FALSE, reqSas = FALSE) {
-
-    # Set the RLSF_R environmental variable
-    if (length(grep("solaris", version$platform, ignore.case = TRUE))) Sys.putenv("RLSF_R" = Sys.getenv("RLSF_UNIX"))
-    else Sys.putenv("RLSF_R" = Sys.getenv("RLSF_LINUX"))
-    .log("Setting the RLSF_R environmental variable to", Sys.getenv("RLSF_R"))
-
-    # Build the call to the grid
-    fname <- tempfile(pattern = "Rlsf_data", tmpdir = getwd())
-    lsf.call <- as.call(list(as.name(func), ...) )
-    savelist <- c(savelist, "lsf.call", "packages")
-    save(list=savelist, file=fname)
-    script <- paste(file.path(.path.package("Rlsf"), "RunLsfJob"), fname)
-    jobid <- .Call("lsf_job_submit", as.integer(debug), script, as.integer(ncpus), PACKAGE="Rlsf")
-    
-    # If SAS is required, modify the LSF call
-    if (reqSas) {
-       try(system(paste("bmod -R sas", jobid), intern=TRUE), silent = TRUE)
-       .log("Setting the job resource tag to SAS ...")
-    }
-
-    # Return the job list information
-    if (jobid) list(jobid=jobid,fname=fname,debug=debug)
-    else return(NULL)
-  }
 
 .ectdSasCall <- function(params, 
-  sasLoc = if (.Platform$OS.type == "windows") Sys.getenv("SASPATH_WIN") else Sys.getenv("SASPATH_UNIX"), 
+  sasLoc = if (.Platform$OS.type == "windows") getEctdExternalPath("SASPATH_WIN") else getEctdExternalPath("SASPATH_UNIX"), 
   macroLoc = file.path(.path.package("MSToolkit"), "sasAnalysis.sas"), 
   logFile = file.path(workingPath, "sasLogfile.log"),
   printFile = file.path(workingPath, "sasOutput.lst"),
   workingPath = getwd()) 
 {
-  sasDir <- gsub( "\\\\[^\\]*$", "", sasLoc)
-  if(!file.exists(sasDir)) ectdStop("SAS is not available on the system: \n\t$sasLoc")
-  callOptions <- if (.Platform$OS.type == "windows") "-nosplash -icon -xmin -noxwait" else "-NOTERMINAL"
-  sasCall <- paste("\"", sasLoc, "\" -SYSIN \"", macroLoc, "\" -SYSPARM \"", params, "\" -LOG \"", logFile, "\" -PRINT \"", printFile, "\" ", callOptions, sep="")
-  .log("Calling SAS with call string: ", sasCall)
-  invisible(try(system(sasCall)))
+	sasDir <- gsub( "\\\\[^\\]*$", "", sasLoc)
+	if(!file.exists(sasDir)) ectdStop("SAS is not available on the system: \n\t$sasLoc")
+	callOptions <- if (.Platform$OS.type == "windows") "-nosplash -icon -xmin -noxwait" else "-NOTERMINAL"
+	sasCall <- paste("\"", sasLoc, "\" -SYSIN \"", macroLoc, "\" -SYSPARM \"", params, "\" -LOG \"", logFile, "\" -PRINT \"", printFile, "\" ", callOptions, sep="")
+	.log("Calling SAS with call string: ", sasCall)
+	invisible(try(system(sasCall)))
 }
 
 
@@ -254,17 +230,64 @@
 .cleanup <- function( 
   cleanUp = TRUE,       # do I do any cleanup
   grid = FALSE,         # was the grid used
-  workingPath = getwd() # where to work 
+  workingPath = getwd(), # where to work 
+  method = getEctdDataMethod()  # Method of data storage to "clean"
   ){
   
-if( cleanUp ){
-   .log("removing micro and macro directories")
-   removeDirectories(c("MicroEvaluation", "MacroEvaluation"), workingPath = workingPath)
-   if(grid){ 
-     .log("Removing Rlsf generated files")
-     try(file.remove(list.files(pattern="Rlsf_.*")), silent = TRUE)
-   }
-}
+	if( cleanUp ){
+		if (method %in% c("CSV", "RData")) {
+			.log("removing micro and macro directories")
+			removeDirectories(c("MicroEvaluation", "MacroEvaluation"), workingPath = workingPath)
+			if(grid){ 
+				allconns <- showConnections()
+				sockconns <- rownames(allconns)[which(allconns[, "class"] == "sockconn")]
+				if (length(sockconns) > 0) for (i in sockconns) try(close(getConnection(i)))
+				.log("clusters were shut down")
+			}
+		}
+		else {
+			ectdStop("Have not yet implemented the cleanup of 'Internal' data stored")
+		}
+	}
   
 }
 
+.applyDataSubset <- function(df, subset) {
+	if (!is.data.frame(df)) ectdStop("Cannot subset a non-data-frame object")
+	dataFlags <- try(eval(parse(text = subset), envir = df))
+	if (is.logical(dataFlags) && length(dataFlags) == nrow(df)) {
+		if (!any(dataFlags)) ectdStop("No rows left following subset")
+		return(df[dataFlags,,drop = FALSE])
+	}
+	else ectdStop("Could not apply subset to the data")
+}
+
+# A replacement for aggregate.data.frame
+.dataAggregate <- function(resp, by, fun, ..., bound = 10^5) {
+	if (length(by) == 1) return(aggregate(resp, by, fun, ...))
+	uniCols <- sapply(by, function(x) length(unique(x)))
+	byProd <- prod(uniCols)
+	if (byProd > bound) {
+		whichSplit <- which(uniCols == max(uniCols))[1]
+		allData <- data.frame(resp, by)
+		splitData <- split(allData, by[[whichSplit]])
+		splitAgg <- lapply(splitData, function(df, respCol, byCol, fun, ...) {
+					aggregate(df[respCol], df[byCol], fun, ...)
+				}, respCol = names(resp), byCol = names(by), fun = fun, ...)
+		outDf <- do.call("rbind", splitAgg)
+		theOrder <- do.call("order", outDf[rev(names(by))])
+		outDf <- outDf[theOrder,,drop = FALSE]
+		row.names(outDf) <- 1:nrow(outDf)
+		outDf
+	}
+	else return(aggregate(resp, by, fun, ...))
+}
+
+# Image Comparison Function
+.compareImages <- function(result, target, 
+		exeLoc = system.file(package = "MSToolkit", "ImageCompare", "diff.exe")) {
+	if (!file.exists(result) | !file.exists(target)) return(FALSE)
+	buildCall <- paste(exeLoc, shortPathName(result), shortPathName(target))
+	x <- system(buildCall, intern = TRUE, wait = TRUE)
+	!(length(x) && length(grep(" differ", x)))
+}

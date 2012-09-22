@@ -1,6 +1,7 @@
 mstoolkitUnitTests <- function(htmlreport = FALSE, showdetails =  TRUE){
   
-  oldverbose <- ectdVerbose( FALSE )
+  oldverbose <- getEctdVerbose()
+  setEctdVerbose( FALSE )
    
   ## unit tests will not be done if RUnit is not available
   if(require("RUnit", quietly=TRUE)) {
@@ -13,6 +14,8 @@ mstoolkitUnitTests <- function(htmlreport = FALSE, showdetails =  TRUE){
     errorLog <- file( "errors.log", open = "wt" ) 
     sink( errorLog,  type = "message" )
     sink( errorLog )
+	unitTestPath <- get("unitTestPath", pos = .GlobalEnv )
+	systemTestPath <- get("systemTestPath", pos = .GlobalEnv )
     testSuite <- defineTestSuite( name=paste(pkg, "unit testing"), dirs=unitTestPath)
     tests <- runTestSuite(testSuite)
     
@@ -47,7 +50,7 @@ mstoolkitUnitTests <- function(htmlreport = FALSE, showdetails =  TRUE){
     warning("cannot run unit tests -- package RUnit is not available")
   }     
 
-  ectdVerbose( oldverbose )
+  setEctdVerbose( oldverbose )
   invisible(NULL)
   
 }

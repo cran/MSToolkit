@@ -42,8 +42,11 @@ if(require("RUnit", quietly=TRUE)) {
   ##  - errors i.e. R errors
   tmp <- getErrors(tests)
   if(tmp$nFail > 0 | tmp$nErr > 0) {
+	testlog <- unlist(lapply(tests[[1]]$sourceFileResults, FUN = function(X) sapply(seq_along(X), FUN = function(Y) paste(X[[Y]][["kind"]], " in ", names(X)[Y], ": ", X[[Y]][["msg"]], sep = ""))))
+	testlog <- gsub("\n", " ", testlog[!grepl("^success", testlog)])
+	testlog <- paste("  - ", testlog, sep = "", collapse = "\n")
     stop(paste("\n\nunit testing failed (#test failures: ", tmp$nFail,
-               ", #R errors: ",  tmp$nErr, ")\n\n", sep=""))
+               ", #R errors: ",  tmp$nErr, ")\n", testlog, "\n\n", sep=""))
   }
   
 } else {

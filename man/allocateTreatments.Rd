@@ -2,37 +2,40 @@
 \alias{allocateTreatments}
 \title{ Allocate treatment to subjects }
 \description{
-  Allocates simulated subjects to treatment groups. 
+  The \emph{Allocate} component is responsible for allocating simulated 
+  subjects to a treatment group. 
 }                    
 \usage{
 allocateTreatments(trts, subjects, prop = NULL, ordered = FALSE, 
-  seed = .deriveFromMasterSeed(), idCol = "SUBJ", trtCol = "TRT")
+  seed = .deriveFromMasterSeed(), idCol = getEctdColName("Subject"), trtCol = getEctdColName("Trt"))
 
 }
 \arguments{
- \item{trts}{ (Required) Number of treatments to which subjects can be allocated.  Subjects will be allocated to treatments "1:\code{trts}" }
- \item{subjects}{ (Required) Number of subjects to be allocated across treatment groups }
- \item{prop}{ (Optional) Vector of probabilities for allocating subjects to each group.  By default, subjects are assigned to each group with equal probability. Proportions should sum to 1.  }
+ \item{trts}{ (Required) Maximum number of treatments to which subjects can be allocated.  Subjects will be allocated to treatments "1:trts" }
+ \item{subjects}{ (Required) Number of subjects to be allocated to each treatment group }
+ \item{prop}{ (Optional) Proportion of subjects in each group.  By default, equal proportions of subjects are assigned to each group }
  \item{ordered}{ (Optional) Should treatments be allocated in order of subject number (ie. first N subjects gets treatment 1) as opposed to random assignment.  Default is FALSE (random assignment) }
  \item{seed}{ (Optional) Random seed to allocate interims.  Based on the current random seed by default }
  \item{idCol}{ (Optional) Subject variable name.  "SUBJ" by default }
  \item{trtCol}{ (Optional) Treatment variable name.  "TRT" by default }
 }
 \details{
- Subjects are randomly allocated to a single treatment.  The possible treatments are numbered "1" to \code{trts}.
+ Subjects numbered "1" to "sum(subjects)" are allocated to a single treatment.  The possible treatments are numbered "1" to "trts".
 
- If \code{subjects} is a single number, the proportion argument is used to determine the proportion to be allocated to each treatment.  By default, subjects are allocated to each treatment group with probability "1/trts". If \code{subjects} is a vector with length \code{trts}, this explicity defines the number of subjects to be allocate to each treatment group.
+ If "subjects" is a single number, the proportion argument is used to determine the proportion to be allocated to each treatment.  By default, subjects are allocated to each treatment group with probability "1/trts".
  
- If \code{ordered} is TRUE, the allocation is done in order (eg. subject 1 gets treatment 1).  If "FALSE", random allocation is performed.
+ If "subjects" is a vector with length "trts", this explicity defines the number of subjects to be allocate to each treatment group.
+ 
+ If "ordered" is TRUE, the allocation is done in order (eg. subject 1 gets treatment 1).  If "FALSE", random allocation is performed.
  
 }
 \value{
   A data frame with subjects and treatment allocations.  This data frame will contain 2 variables:
-\item{SUBJ}{The Subjects identifier}
-\item{TRT}{The Treatment numeric that the subject is allocated to}
+\code{SUBJ}{The Subjects identifier }
+\code{TRT}{The Treatment numeric that the subject is allocated to }
   ...
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ 
   \code{\link{createTreatments}} to create the set of possible treatments given a 
   sequence matrix for a crossover design or a set of doses for a parallel design.

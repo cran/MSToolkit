@@ -6,22 +6,22 @@
   Generate Simulated Data Replicates by controlling dosing, covariates, parametes, response, missingness and interims
 }
 \usage{
-generateData(replicateN, subjects, treatSubj = subjects, treatDoses, treatSeq, treatType = "Parallel", treatPeriod, 
-  genParNames, genParMean, genParVCov = 0, respEqn, respName = "RESP", treatProp, treatOrder = FALSE, conCovNames, conCovMean, conCovVCov, conCovCrit = NULL, 
-  conCovDigits = 3, conCovMaxDraws = 100, disCovNames, disCovVals, disCovProb, disCovProbArray, extCovNames, extCovFile, extCovSubset, extCovRefCol, 
-  extCovSameRow = TRUE, extCovDataId = idCol, genParCrit, genParBtwNames, genParBtwMean, genParBtwVCov, genParBtwCrit, genParErrStruc = "None", 
-  genParMaxDraws = 100, extParFile, extParNames, extParBtwNames, extParBtwNums, extParSubset = NULL, extParErrStruc = "None", extParRefColData, 
+generateData(replicateN, subjects = NULL, treatSubj = subjects, treatDoses, treatSeq, treatType = "Parallel", treatPeriod, 
+  genParNames, genParMean, genParVCov = 0, respEqn, respName = getEctdColName("Response"), treatProp, treatOrder = FALSE, conCovNames, conCovMean, conCovVCov, conCovCrit = NULL, 
+  conCovDigits = 3, conCovMaxDraws = 100, disCovNames, disCovVals, disCovProb, disCovProbArray, extCovNames, extCovFile, extCovSubset, extCovRefCol, extCovSameRow = TRUE, extCovDataId = idCol, 
+  timeCovNames , timeCovMean, timeCovVCov, timeCovCrit = NULL, genParCrit, genParBtwNames, genParBtwMean, genParBtwVCov, genParErrStruc = "None", 
+  genParMaxDraws = 100, genParRangeTolerance = .5, extParFile, extParNames, extParBtwNames, extParBtwNums, extParSubset = NULL, extParCrit, extParErrStruc = "None", extParRefColData, 
   extParRefColName, extParDataId = idCol, respInvLink, respDist = "Normal", respVCov, respErrStruc = "Additive", respCrit, respDigits = 3, mcarProp = 0, mcarRule, dropFun,
-  dropFunExtraArgs = list(), interimSubj, interimMethod = "Sample", seed = .deriveFromMasterSeed(), idCol = "SUBJ", doseCol = "DOSE", timeCol = "TIME", 
-  trtCol = "TRT", parOmitFlag = "PAROMIT", respOmitFlag = "RESPOMIT", missingFlag = "MISSING", interimCol = "INTERIM", parBtwSuffix = ".Between", 
-  deleteDirs = TRUE, covDiff = TRUE, treatDiff = TRUE, workingPath = getwd() )
+  dropFunExtraArgs = list(), interimSubj, interimMethod = "Sample", seed = .deriveFromMasterSeed(), idCol = getEctdColName("Subject"), doseCol = getEctdColName("Dose"), timeCol = getEctdColName("Time"), 
+  trtCol = getEctdColName("Trt"), parOmitFlag = getEctdColName("ParOmit"), respOmitFlag = getEctdColName("RespOmit"), missingFlag = getEctdColName("Missing"), interimCol = getEctdColName("Interim"), parBtwSuffix = ".Between", 
+  deleteCurrData = TRUE, covDiff = TRUE, treatDiff = TRUE, workingPath = getwd() )
 }
 
 \arguments{
   \item{replicateN}{ (Required) Number of replicates for which to create simulated data }
   \item{subjects}{ (Required) Number of subjects in simulation }
   \item{treatSubj}{ (Optional) Number of subjects to which to allocate treatments, or a vector of allocations }
-  \item{treatDoses}{ (Required) Vector of numeric treatment doses.  By default, this is the same as the "subjects" input }
+  \item{treatDoses}{ (Optional) Vector of numeric treatment doses.  By default, this is the same as the "subjects" input }
   \item{treatSeq}{ (Optional) Treatment matrix for crossover designs.  Missing by default, but this is required when treatType is set to "Crossover" }
   \item{treatType}{ (Optional) Treatment type: 'Parallel' or 'Crossover'.  Default is "Parallel" }
   \item{treatPeriod}{ (Optional) Vector of numeric treatment time points.  Missing by default, resulting in no "time" element in the generated data }
@@ -48,18 +48,23 @@ generateData(replicateN, subjects, treatSubj = subjects, treatDoses, treatSeq, t
   \item{extCovRefCol}{ (Optional) Reference variable.  Missing by default }
   \item{extCovSameRow}{ (Optional) Logical flag: should covariates sampled be from the same row.  TRUE by default }
   \item{extCovDataId}{ (Optional) Subject variable name from file.  Same as "idCol" by default }
+  \item{timeCovNames}{ (Optional) Time-varying covariate names.  Missing by default, resulting in no Time-varying covariates being created }
+  \item{timeCovMean}{ (Optional) Time-varying covariate means.  Missing by default }
+  \item{timeCovVCov}{ (Optional) Time-varying covariate covariance matrix.  Missing by default }
+  \item{timeCovCrit}{ (Optional) Time-varying covariate acceptable range.  Missing by default }
   \item{genParCrit}{ (Optional) Range of acceptable values for generated fixed effects.  Missing by default }
   \item{genParBtwNames}{ (Optional) Between subject effects to generate.  Missing by default, resulting in no created between subject effects }
   \item{genParBtwMean}{ (Optional) Means for generated between subject effects.  Missing by default }
   \item{genParBtwVCov}{ (Optional) Covariance matrix for generated between subject effects.  Missing by default }
-  \item{genParBtwCrit}{ (Optional) Range of acceptable values for generated between subject effects.  Missing by default }
   \item{genParErrStruc}{ (Optional) Function to map generated effects: Additive, Proportional or None.  "None" by default }
   \item{genParMaxDraws}{ (Optional) Maximum number of iterations to generate valid parameters.  100 by default}
+  \item{genParRangeTolerance}{ (Optional) Proportion of subjects with "in range" parameter data that we're happy proceeding with }
   \item{extParFile}{ (Optional) File name for external parameter data to import.  Missing by default, resulting in no imported parameter variables }
   \item{extParNames}{ (Optional) Names of parameters to import from external file.  Missing by default }
   \item{extParBtwNames}{ (Optional) Between subject effects variables to import from external file.  Missing by default }
   \item{extParBtwNums}{ (Optional) Integer mapping between random and fixed effects in imported parameter data.  Missing by default }
   \item{extParSubset}{ (Optional) Subsets to be applied to imported parameter before sampling.  Missing by default }
+  \item{extParCrit}{ (Optional) Acceptance range for imported parameter columns }
   \item{extParErrStruc}{ (Optional) Function to map effects from imported parameter data: Additive, Proportional or None.  "None" by default }
   \item{extParRefColData}{ (Optional) Reference column in imported parameter data.  Missing by default }
   \item{extParRefColName}{ (Optional) Reference column name from imported parameter data.  Missing by default }
@@ -67,7 +72,7 @@ generateData(replicateN, subjects, treatSubj = subjects, treatDoses, treatSeq, t
   \item{respInvLink}{ (Optional) Inverse link function for the linear predictor.  Missing by default, resulting in no inverse link to be applied }
   \item{respDist}{ (Optional) Outcome response variable distribution ("Normal" by default) }
   \item{respVCov}{ (Optional) Residual error (co)variance to apply to generated response.  None by default }
-  \item{respErrStruc}{ (Optional) Function describing how to apply residual error to the generated response: Additive or Proportional.  "Additive" by default }
+  \item{respErrStruc}{ (Optional) Function describing how to apply residual error to the generated response: Additive, Log-Normal or Proportional.  "Additive" by default }
   \item{respCrit}{ (Optional) Range of acceptable values for created response.  Missing (no criteria) by default }
   \item{respDigits}{ (Optional) Number of digits to which to round the created response.  3 by default }
   \item{mcarProp}{ (Optional) Proportion of observations to set to missing at random.  0 by default }
@@ -86,7 +91,7 @@ generateData(replicateN, subjects, treatSubj = subjects, treatDoses, treatSeq, t
   \item{missingFlag}{ (Optional) Missingness flag name ("MISSING" by default) }
   \item{interimCol}{ (Optional) Interim variable name ("INTERIM" by default) }
   \item{parBtwSuffix}{ (Optional) Suffix for retained between subject effects variables.  Suffix ".Between" is used by default }
-  \item{deleteDirs}{ (Optional) Should existing data be deleted before starting generation phase (TRUE by default) }
+  \item{deleteCurrData}{ (Optional) Should existing data be deleted before starting generation phase (TRUE by default) }
   \item{covDiff}{ (Optional) Should covariates differ between replicates (TRUE by default) }
   \item{treatDiff}{ (Optional) Should treatment allocation differ between replicates (TRUE by default) }
   \item{workingPath}{ (Optional) Working directory from which to create data.  By default, the current working directory is used }  
@@ -115,17 +120,12 @@ The following components are called to create aspects of the simulated trial dat
 The function iteratively builds and combines the data components for each replicte, and stores the data in the "ReplicateData" subdirectory of the working directory.  
 This data can then be analyzed using a call to the \code{\link{analyzeData}} function.
 
-  MSToolkit was design with early phase trials in mind where we wish to simulate and compare several doses. However it is possible to view "DOSE" as a label and work with TRT or DOSE as an arbitrary variable - allowing for simulation and evaluation of designs with active comparators, no placebo arm (e.g. bioequivalence), or non-clinical designs, changing the \code{doseCol}, \code{timeCol} and \code{trtCol} to appropriate useful labels e.g. FACTOR, LITTER, TEMPERATURE, PRESSURE, etc.
-
-  MSToolkit creates or samples fixed effect parameters which can vary between trial replicates. Within each replicate individual subjects can vary around the sampled fixed effect value. Usually this is only used if there are repeated measures for a single subject. The between subject variance is added to the fixed effect to give an individualised value to the parameter for each subject.
-
-  MSToolkit generates response values using the concept of specifying a linear predictor which is then used as the input to a random number generator in order to create Normal, Binary and Poisson random variates.  \code{createResponse} specifies the linear predictor. In the case of Normally distributed response variables, a separate residual error is added using \code{addResidualError} function. 
 }
 \value{
   No value is returned from the generateData function.  However, as a side effect, a number of simulated replicate datasets are created.
 }
 
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ 
   \code{\link{createTreatments}}, \code{\link{allocateTreatments}}, \code{\link{createCovariates}}, \code{\link{createParameters}}, 
   \code{\link{createResponse}}, \code{\link{createMCAR}}, \code{\link{createDropout}}, \code{\link{createInterims}} and \code{\link{analyzeData}}

@@ -5,9 +5,9 @@
   Create a response from a dataset and an equation.
 }
 \usage{
-createResponse(data, equation, name = "RESP", invLink, distribution = "normal", 
-  covariance, errStruc = "additive", range, digits = 3, 
-  seed, flagName = "RESPOMIT")
+createResponse(data, equation, name = getEctdColName("Response"), invLink, distribution = "normal", 
+  covariance, errStruc = c("Additive", "Proportional", "Log-Normal"), range, digits = 3, 
+  seed = .deriveFromMasterSeed(), flagName = getEctdColName("RespOmit"))
 }
 \arguments{
   \item{data}{ (Required) Data structure to which to add response. }
@@ -16,7 +16,7 @@ createResponse(data, equation, name = "RESP", invLink, distribution = "normal",
   \item{invLink}{ (Optional) Inverse link function for the predictor. This is an R \code{\link{function}}.  No inverse link function by default}
   \item{distribution}{ (Optional) Outcome variable distribution, one of "n" for normal, "l" for lognormal, "b" for binomial or "p" for poisson.  Default is "Normal" }
   \item{covariance}{ (Optional) Residual Error (CO)VARIANCE, passed to the \code{\link{addResidualError}} function.  Missing by default, resulting in no residual error generated for the reponse }
-  \item{errStruc}{ (Optional) Function describing how to apply residual error: "Additive" (default) or "Proportional" }
+  \item{errStruc}{ (Optional) Function describing how to apply residual error: "Additive", "Log-Normal" or "Proportional".   "Additive" is the default}
   \item{range}{ (Optional) Range of acceptable values for created response. See \code{\link{parseRangeCode}}.  Missing by default, resulting in no "range" limitation on the response }
   \item{digits}{ (Optional) Number of digits to which to round the response (3 by default)}
   \item{seed}{ (Optional) Random number seed.  By default, this is derived from the current random seed }
@@ -28,13 +28,10 @@ createResponse(data, equation, name = "RESP", invLink, distribution = "normal",
   \item{RESPOMIT}{The response OMIT flag. It is named from the value of 
   the \code{flagName} argument.}
 }
-
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
-
-\details{
-  MSToolkit generates response values using the concept of specifying a linear predictor which is then used as the input to a random number generator in order to create Normal, Binary and Poisson random variates.  \code{\link{createResponse}} specifies the linear predictor. In the case of Normally distributed response variables, a separate residual error is added using \code{\link{addResidualError}} function. 
+\note{
+In earlier versions of MSToolkit, the "Proportional" Error Structure behaved differently (it assumed parameters passed were on the log scale)
 }
-
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ The lower-level function of the response component: 
   \code{\link{createResponseVariable}} and \code{\link{addResidualError}} are called 
   by \code{createResponse}.

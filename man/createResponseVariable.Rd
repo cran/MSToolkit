@@ -14,7 +14,7 @@ createResponseVariable(data, equation, preTest = TRUE, subsetSize = 5)
   \item{subsetSize}{ (Optional) Size of the subset if the \code{preTest} has been requested. }
 }
 \details{
-  Using the \code{preTest} will make the function fail early if the supplied function in \code{equation} is not a valid R function. 
+  Using the \code{preTest} will make the function fail early if the code is wrong. 
   This is typically useful during the first steps of try and error. When the 
   user is confident that the \code{equation} is correct, the \code{preTest} can be set 
   to \code{FALSE}.
@@ -22,7 +22,7 @@ createResponseVariable(data, equation, preTest = TRUE, subsetSize = 5)
 \value{
   A numeric vector corresponding to the response variable.
 }
-\author{ Mango Solutions & Pfizer \email{mstoolkit@googlemail.com} }
+\author{ Mike K Smith \email{mstoolkit@googlemail.com} }
 \seealso{ \code{\link{addResidualError}} adds a residual error to a response. 
   
   The function \code{\link{createResponse} } is the high level function in the 

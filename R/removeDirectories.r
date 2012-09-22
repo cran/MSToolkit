@@ -1,7 +1,8 @@
 removeDirectories <- function(  
   dirNames = c("ReplicateData", "MicroEvaluation", "MacroEvaluation"), 
                          #@ A vector containing the full names of the directories to be removed
-  workingPath = getwd()  #@ Directory in which to remove directories
+  workingPath = getwd(), #@ Directory in which to remove directories
+  method = getEctdDataMethod()   #@ Data Storage Method to use
 ) {
   ###############################################################################
   # Mango Solutions, Chippenham SN14 0SQ 2006
@@ -18,15 +19,44 @@ removeDirectories <- function(
   
   # Match directory name against expected inputs
   dirNames <- match.arg(dirNames, several.ok = TRUE)
-  
-  # Create full directory paths
-  fullPaths <- file.path(workingPath, dirNames)
 
-  # Create directories using the "dir.create" function
-  result <- sapply(fullPaths, unlink, recursive = TRUE)
-  result <- as.logical(as.vector(result)) # Convert result to logicals with no names
-  
-  if (any(result)) .log(paste("Removed directory", fullPaths[result]))
+  # Match data storage method against recognised methods
+  method <- match.arg(method, c("CSV", "RData", "Internal"))	
 
-  return(result)	
+  # Loop around if more than 1 directory
+  if (length(dirNames) > 1) {
+
+	  checkTrue <- c()
+	  
+	  for (i in 1:length(dirNames)) checkTrue[i] <- removeDirectories(dirNames[i], workingPath = workingPath, method = method)
+	  
+	  return(checkTrue)
+  }
+  else {
+
+		# If we're only dealing with Micro/Macro, we should be using CSV method
+		if (substring(dirNames, 1, 1) == "M") method <- "CSV"
+
+		# Remove physical directories
+		if (method %in% c("CSV", "RData")) {
+
+			# Create full directory paths
+			fullPath <- file.path(workingPath, dirNames)	
+			
+			# Remove directories using the "unlink" function
+			try(unlink(fullPath, recursive = TRUE))
+			
+			# Has the directory been removed?
+			result <- !file.exists(fullPath)
+
+			if (result) .log(paste("Removed directory", fullPath))
+
+			return(result)	
+
+		}
+  		else {
+			.ectdEnv$DataStore <- NULL
+			return(TRUE)
+		}
+	}
 }

@@ -1,16 +1,2 @@
-
-################################################################################
-#                                                                              #
-#               MSToolkit package version $version                         #
-#      originally developed for Pfizer by Mango Solutions                      #    
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#                                                                Contact       #
-# E-Mail: mstoolkit@googlemail.com                                             #
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#                                                                Get started   #
-# > demo( "emax", package = "MSToolkit")                                       #
-# > file.show( system.file("demo", "emax.R", package = "MSToolkit") )          #
-# > ?generateData                                                              #
-# > ?analyzeData                                                               #
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
+# MSToolkit package version $version developed for Pfizer by Mango Solutions
+# E-Mail: mstoolkit@googlemail.com
